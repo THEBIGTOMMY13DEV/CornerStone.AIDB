@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@300;400;600&display=swap');
+
+:root {
+  --serif: 'DM Serif Display', serif;
+  --sans: 'DM Sans', sans-serif;
+  --outfit: 'Outfit', sans-serif;
+  --stone: #1A1A18;
+  --stone-mid: #6B6A63;
+  --stone-light: #F8F7F2;
+  --stone-border: #E5E3D8;
+  --teal-bg: #F0F9F6;
+  --teal-mid: #1D9E75;
+  --teal-dark: #085041;
+  --amber-bg: #FFF9ED;
+  --amber-mid: #BA7517;
+  --amber-dark: #633806;
+  --purple-bg: #F5F4FF;
+  --purple-mid: #534AB7;
+  --purple-dark: #26215C;
+  --white: #FFFFFF;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.06);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  font-family: var(--sans);
+  background-color: var(--stone-light);
+  background-image: radial-gradient(var(--stone-border) 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  color: var(--stone);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Split-screen wrapper inside the card app window */
+#app {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 600px;
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--stone-border);
+  overflow: hidden;
+}
+
+.diag-container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  min-height: 600px;
+  width: 100%;
+}
+
+/* Branding panel (Left column) */
+.diag-visual {
+  background: var(--stone);
+  color: var(--white);
+  padding: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glow ambient vector background accent effect */
+.diag-visual::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  background: var(--teal-mid);
+  filter: blur(100px);
+  opacity: 0.25;
+  z-index: 1;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 36px;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 2;
+}
+
+.tagline {
+  font-family: var(--outfit);
+  font-size: 16px;
+  font-weight: 300;
+  opacity: 0.85;
+  line-height: 1.5;
+  position: relative;
+  z-index: 2;
+}
+
+/* Input Workspace controls (Right column) */
+.diag-form-wrap {
+  padding: 3.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--white);
+}
+
+.auth-box {
+  width: 100%;
+  animation: authBoxFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes authBoxFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Structural input elements & layout groupings */
+.field {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--stone-mid);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+input[type="text"], 
+input[type="password"],
+select {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1.5px solid var(--stone-border);
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--stone);
+  background-color: var(--white);
+  outline: none;
+  transition: var(--transition);
+}
+
+input[type="text"]:focus, 
+input[type="password"]:focus,
+select:focus {
+  border-color: var(--stone);
+  box-shadow: var(--shadow-sm);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888780' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Form Action Buttons */
+.cta {
+  width: 100%;
+  height: 50px;
+  background: var(--stone);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta:hover {
+  background: var(--teal-mid);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.cta:active {
+  transform: translateY(0);
+}
+
+/* Toggle Link Text */
+.auth-toggle-text {
+  font-size: 13px;
+  color: var(--stone-mid);
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.auth-toggle-text span {
+  color: var(--purple-mid);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.auth-toggle-text span:hover {
+  color: var(--stone);
+}
+
+/* Responsive Mobile Layout Adaptations */
+@media (max-width: 768px) {
+  body {
+    padding: 0;
+    background-image: none;
+    background-color: var(--white);
+  }
+
+  #app {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+
+  .diag-container {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+
+  .diag-visual {
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .diag-form-wrap {
+    padding: 2.5rem 1.5rem;
+    justify-content: flex-start;
+  }
+}
