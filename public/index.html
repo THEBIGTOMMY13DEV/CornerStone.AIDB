@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cornerstone AI | Portal</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <div id="app">
+    <div class="diag-container">
+      
+      <div class="diag-visual">
+        <div class="wordmark">Cornerstone</div>
+        <div class="tagline">Personalized academic recovery. Secure login and registration portal.</div>
+      </div>
+      
+      <div class="diag-form-wrap">
+        
+        <div class="field-label" style="font-size: 16px; color: var(--stone); margin-bottom: 1rem;">Welcome Back</div>
+        <form id="loginForm">
+          <div class="field">
+            <div class="field-label">Username</div>
+            <input type="text" id="loginUsername" placeholder="Enter your username" required>
+          </div>
+          <div class="field">
+            <div class="field-label">Password</div>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required 
+                   style="width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid var(--stone-border); border-radius: 10px; font-family: var(--sans); font-size: 14px; outline: none;">
+          </div>
+          <button type="submit" class="cta">Secure Log In →</button>
+        </form>
+        <p id="loginMessage" style="font-size: 14px; margin-top: 10px; font-weight: 600;"></p>
+
+        <div class="section-line" style="margin: 2rem 0; background: var(--stone-border); height: 1px;"></div>
+
+        <div class="field-label" style="font-size: 16px; color: var(--stone); margin-bottom: 1rem;">Create Account</div>
+        <form id="registerForm">
+          <div class="field">
+            <div class="field-label">New Username</div>
+            <input type="text" id="username" placeholder="Choose a username" required>
+          </div>
+          <div class="field">
+            <div class="field-label">New Password</div>
+            <input type="password" id="password" placeholder="Create a password" required 
+                   style="width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid var(--stone-border); border-radius: 10px; font-family: var(--sans); font-size: 14px; outline: none;">
+          </div>
+          <div class="field">
+            <div class="field-label">Account Role</div>
+            <select id="role">
+              <option value="Student">Student</option>
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="cta" style="background: var(--stone-mid);">Register Account</button>
+        </form>
+        <p id="message" style="font-size: 14px; margin-top: 10px; font-weight: 600;"></p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

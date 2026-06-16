@@ -1,0 +1,389 @@
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=Outfit:wght@300;400;600&display=swap');
+    
+    :root {
+      --serif: 'DM Serif Display', serif;
+      --sans: 'DM Sans', sans-serif;
+      --outfit: 'Outfit', sans-serif;
+      --stone: #1A1A18;
+      --stone-mid: #6B6A63;
+      --stone-light: #F8F7F2;
+      --stone-border: #E5E3D8;
+      --teal-bg: #F0F9F6;
+      --teal-mid: #1D9E75;
+      --teal-dark: #085041;
+      --amber-bg: #FFF9ED;
+      --amber-mid: #BA7517;
+      --amber-dark: #633806;
+      --coral-bg: #FFF5F2;
+      --coral-mid: #D85A30;
+      --coral-dark: #4A1B0C;
+      --purple-bg: #F5F4FF;
+      --purple-mid: #534AB7;
+      --purple-dark: #26215C;
+      --white: #FFFFFF;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+      --shadow-md: 0 10px 30px rgba(0,0,0,0.06);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--sans);
+      background-color: var(--stone-light);
+      background-image: radial-gradient(var(--stone-border) 0.5px, transparent 0.5px);
+      background-size: 24px 24px;
+      color: var(--stone);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow: hidden; /* Prevent body scroll on desktop */
+    }
+
+    @media (max-width: 899px) {
+      body { 
+        overflow: auto; 
+        padding: 0; /* Remove padding to fill screen */
+        background-image: none; /* Cleaner look for mobile */
+        background-color: var(--white); /* Match app background */
+      }
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1100px;
+      max-height: 90vh; /* Keep it within viewport on desktop */
+      background: var(--white);
+      border-radius: 24px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+
+    @media (max-width: 899px) {
+      #app { 
+        max-width: none; 
+        max-height: none; 
+        height: auto; 
+        min-height: 100vh; 
+        border-radius: 0; 
+        box-shadow: none; 
+      }
+    }
+
+    .screen { display: none; opacity: 0; height: 100%; overflow: hidden; }
+    .screen.active { display: flex; flex-direction: column; opacity: 1; }
+
+    /* Diagnostic Screen Layout */
+    .diag-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .diag-container { flex-direction: row; }
+      .diag-visual { 
+        flex: 1; 
+        background: var(--stone); 
+        padding: 3rem; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center;
+        color: var(--white);
+        position: relative;
+        overflow: hidden;
+      }
+      .diag-visual::after {
+        content: '';
+        position: absolute;
+        bottom: -100px;
+        right: -100px;
+        width: 400px;
+        height: 400px;
+        background: var(--teal-mid);
+        filter: blur(120px);
+        opacity: 0.2;
+      }
+      .diag-form-wrap { 
+        flex: 1.5; 
+        padding: 2.5rem 3.5rem; 
+        overflow-y: auto; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+      }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    }
+
+    @media (max-width: 899px) {
+      .diag-visual { padding: 3rem 2rem; background: var(--stone); color: var(--white); }
+      .diag-form-wrap { padding: 2.5rem 1.5rem; overflow-y: visible; }
+      .form-row { display: block; }
+    }
+
+    .wordmark {
+      font-family: var(--serif);
+      font-size: 32px;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .tagline {
+      font-size: 16px;
+      font-family: var(--outfit);
+      font-weight: 300;
+      opacity: 0.8;
+      line-height: 1.4;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--stone-mid);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .field { margin-bottom: 1.25rem; }
+
+    select, input[type=text] {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      border: 1.5px solid var(--stone-border);
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 14px;
+      background: var(--white);
+      color: var(--stone);
+      outline: none;
+      transition: var(--transition);
+    }
+    select:focus, input[type=text]:focus { border-color: var(--stone); }
+    select:disabled { background-color: var(--stone-light); opacity: 0.6; }
+    
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888780' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      appearance: none;
+    }
+
+    .progress-group { display: flex; flex-direction: column; gap: 8px; }
+    .prog-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--stone-border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .prog-row.selected { background: var(--teal-bg); border-color: var(--teal-mid); }
+    .prog-row input[type=radio] { accent-color: var(--teal-mid); width: 18px; height: 18px; flex-shrink: 0; }
+    .prog-label { font-size: 14px; font-weight: 600; }
+    .prog-desc { font-size: 12px; color: var(--stone-mid); }
+
+    .cta {
+      width: 100%;
+      height: 52px;
+      background: var(--stone);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: var(--transition);
+    }
+    .cta:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    /* Roadmap Screen Layout */
+    .roadmap-header {
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid var(--stone-border);
+      flex-shrink: 0;
+    }
+    .roadmap-content {
+      padding: 1.5rem 3rem;
+      flex: 1;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .roadmap-grid {
+      display: grid;
+      gap: 2rem;
+      flex: 1;
+      min-height: 0; /* Important for flex child scrolling */
+    }
+
+    @media (min-width: 900px) {
+      .roadmap-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 899px) {
+      .roadmap-header { padding: 1.5rem; }
+      .roadmap-content { padding: 1.5rem; overflow-y: auto; }
+      .roadmap-grid { display: block; flex: none; }
+    }
+
+    .roadmap-col { display: flex; flex-direction: column; min-height: 0; }
+
+    .back-btn {
+      background: none;
+      border: 1px solid var(--stone-border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--stone-mid);
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+
+    .student-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 1rem;
+    }
+    .student-name { font-family: var(--serif); font-size: 26px; }
+    .student-meta { font-size: 14px; color: var(--stone-mid); }
+    
+    .badge { font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+    .badge-teal { background: var(--teal-bg); color: var(--teal-dark); }
+    .badge-amber { background: var(--amber-bg); color: var(--amber-dark); }
+    .badge-coral { background: var(--coral-bg); color: var(--coral-dark); }
+
+    .progress-bar-wrap { max-width: 400px; }
+    .pb-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .pb-track { height: 8px; background: var(--stone-light); border-radius: 10px; overflow: hidden; }
+    .pb-fill { height: 100%; background: var(--teal-mid); width: 0%; transition: width 1s ease; }
+
+    .section-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--stone-mid);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-line { flex: 1; height: 1px; background: var(--stone-border); }
+
+    .milestone-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      overflow-y: auto; 
+      padding-right: 8px;
+    }
+
+    .screen.active .milestone-list {
+      animation: hideOverflow 1.2s steps(1) forwards; /* Prevents scrollbar flash during entry */
+    }
+
+    @keyframes hideOverflow {
+      0% { overflow-y: hidden; }
+      100% { overflow-y: auto; }
+    }
+
+    /* Custom Scrollbar */
+    .milestone-list::-webkit-scrollbar, .diag-form-wrap::-webkit-scrollbar { width: 6px; }
+    .milestone-list::-webkit-scrollbar-track, .diag-form-wrap::-webkit-scrollbar-track { background: var(--stone-light); border-radius: 10px; }
+    .milestone-list::-webkit-scrollbar-thumb, .diag-form-wrap::-webkit-scrollbar-thumb { background: var(--stone-border); border-radius: 10px; }
+
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1.5px solid var(--stone-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--white);
+      opacity: 0;
+      animation: milestoneFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .milestone:hover { transform: translateX(2px); border-color: var(--stone-mid); }
+    .milestone.done { background: var(--teal-bg); border-color: var(--teal-mid); }
+
+    @keyframes milestoneFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--stone-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+    }
+    .milestone.done .check { background: var(--teal-mid); border-color: var(--teal-mid); }
+    .checkmark { width: 12px; height: 12px; stroke: var(--white); fill: none; stroke-width: 3; display: none; }
+    .milestone.done .checkmark { display: block; }
+
+    .m-content { flex: 1; }
+    .m-title { font-size: 14px; font-weight: 600; color: var(--stone); }
+    .m-sub { font-size: 12px; color: var(--stone-mid); margin-top: 1px; }
+    .m-week { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .week-now { background: var(--purple-bg); color: var(--purple-dark); }
+    .week-soon { background: var(--amber-bg); color: var(--amber-dark); }
+
+    .tip-box {
+      background: var(--purple-bg);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-size: 14px;
+      color: var(--purple-dark);
+      line-height: 1.5;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    @keyframes tipFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .tip-animate {
+      animation: tipFadeIn 0.3s ease-out forwards;
+    }
+    .tip-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .screen.active > * { animation: fadeIn 0.4s ease forwards; }
