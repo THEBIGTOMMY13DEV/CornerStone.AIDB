@@ -3,65 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cornerstone AI | Portal</title>
+  <title>Cornerstone | Personalized Academic Roadmap</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
-  <div id="app">
+<div id="app">
+  <!-- DIAGNOSTIC SCREEN -->
+  <div class="screen active" id="s-diag">
     <div class="diag-container">
-      
       <div class="diag-visual">
         <div class="wordmark">Cornerstone</div>
-        <div class="tagline">Personalized academic recovery. Secure login and registration portal.</div>
+        <div class="tagline">Personalized academic recovery for every grade level. Rebuild foundations, close gaps, and master what's next.</div>
       </div>
-      
       <div class="diag-form-wrap">
-        
-        <div class="field-label" style="font-size: 16px; color: var(--stone); margin-bottom: 1rem;">Welcome Back</div>
-        <form id="loginForm">
+        <div class="form-row">
           <div class="field">
-            <div class="field-label">Username</div>
-            <input type="text" id="loginUsername" placeholder="Enter your username" required>
+            <div class="field-label">Full Name</div>
+            <input type="text" id="inp-name" placeholder="e.g. Alex Rivera" />
           </div>
-          <div class="field">
-            <div class="field-label">Password</div>
-            <input type="password" id="loginPassword" placeholder="Enter your password" required 
-                   style="width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid var(--stone-border); border-radius: 10px; font-family: var(--sans); font-size: 14px; outline: none;">
-          </div>
-          <button type="submit" class="cta">Secure Log In →</button>
-        </form>
-        <p id="loginMessage" style="font-size: 14px; margin-top: 10px; font-weight: 600;"></p>
 
-        <div class="section-line" style="margin: 2rem 0; background: var(--stone-border); height: 1px;"></div>
-
-        <div class="field-label" style="font-size: 16px; color: var(--stone); margin-bottom: 1rem;">Create Account</div>
-        <form id="registerForm">
           <div class="field">
-            <div class="field-label">New Username</div>
-            <input type="text" id="username" placeholder="Choose a username" required>
-          </div>
-          <div class="field">
-            <div class="field-label">New Password</div>
-            <input type="password" id="password" placeholder="Create a password" required 
-                   style="width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid var(--stone-border); border-radius: 10px; font-family: var(--sans); font-size: 14px; outline: none;">
-          </div>
-          <div class="field">
-            <div class="field-label">Account Role</div>
-            <select id="role">
-              <option value="Student">Student</option>
-              <option value="Staff">Staff</option>
-              <option value="Admin">Admin</option>
+            <div class="field-label">Current Grade</div>
+            <select id="inp-grade" onchange="updateCourseOptions()">
+              <option value="">Select your grade...</option>
+              <option value="9">9th Grade</option>
+              <option value="10">10th Grade</option>
+              <option value="11">11th Grade</option>
+              <option value="12">12th Grade</option>
             </select>
           </div>
-          <button type="submit" class="cta" style="background: var(--stone-mid);">Register Account</button>
-        </form>
-        <p id="message" style="font-size: 14px; margin-top: 10px; font-weight: 600;"></p>
+        </div>
 
+        <div class="field">
+          <div class="field-label">Target Course</div>
+          <select id="inp-course" disabled onchange="validateForm()">
+            <option value="">Select a course...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="field-label">How are you feeling in this class?</div>
+          <div class="progress-group" id="prog-group">
+            <label class="prog-row" onclick="selectProg(this)">
+              <input type="radio" name="prog" value="lost" onchange="validateForm()">
+              <div>
+                <div class="prog-label">Completely lost</div>
+                <div class="prog-desc">I'm struggling with the basics and need a full foundation rebuild.</div>
+              </div>
+            </label>
+            <label class="prog-row" onclick="selectProg(this)">
+              <input type="radio" name="prog" value="gaps" onchange="validateForm()">
+              <div>
+                <div class="prog-label">Some major gaps</div>
+                <div class="prog-desc">I understand most things, but specific units are holding me back.</div>
+              </div>
+            </label>
+            <label class="prog-row" onclick="selectProg(this)">
+              <input type="radio" name="prog" value="shaky" onchange="validateForm()">
+              <div>
+                <div class="prog-label">Shaky on a few topics</div>
+                <div class="prog-desc">Mostly on track, just need to polish a few weak areas.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button class="cta" id="gen-btn" onclick="generateRoadmap()" disabled>Generate My Roadmap →</button>
       </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- ROADMAP SCREEN -->
+  <div class="screen" id="s-roadmap">
+    <div class="roadmap-header">
+      <button class="back-btn" onclick="goBack()">← Edit Details</button>
+      
+      <div class="student-banner">
+        <div>
+          <div class="student-name" id="r-name"></div>
+          <div class="student-meta" id="r-meta"></div>
+        </div>
+        <span class="badge" id="r-badge"></span>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="pb-label"><span>Recovery Progress</span><strong id="pb-pct">0%</strong></div>
+        <div class="pb-track"><div class="pb-fill" id="pb-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="roadmap-content">
+      <div class="roadmap-grid">
+        <div class="roadmap-col">
+          <div class="section-header"><span>Priority Gaps</span><div class="section-line"></div></div>
+          <div class="milestone-list" id="gaps-list"></div>
+        </div>
+
+        <div class="roadmap-col">
+          <div class="section-header"><span>Upcoming Units</span><div class="section-line"></div></div>
+          <div class="milestone-list" id="next-list"></div>
+        </div>
+      </div>
+
+      <div class="tip-box" id="tip-box">
+        <div class="tip-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2L12.5 7.5L18.5 8.5L14 13L15.5 19L10 16L4.5 19L6 13L1.5 8.5L7.5 7.5L10 2Z" fill="#534AB7"/>
+          </svg>
+        </div>
+        <div id="tip-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./script.js"></script>
 </body>
 </html>

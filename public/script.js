@@ -1,10 +1,3 @@
-// --- FULLSTACK ADDITION 1: SECURITY & USERNAME GRAB ---
-const currentUser = localStorage.getItem('username');
-if (!currentUser) {
-  // If they bypassed the login gate, kick them back to index.html
-  window.location.href = "index.html"; 
-}
-// ------------------------------------------------------
 const GRADE_COURSES = {
   "9": ["algebra1", "biology", "world_hist", "english9"],
   "10": ["geometry", "chemistry", "us_hist", "english10"],
@@ -481,6 +474,8 @@ const CURRICULUM = {
   }
 };
 
+// ... (Your massive CURRICULUM object is up here unchanged) ...
+
 let currentDefaultTip = "";
 
 function updateCourseOptions() {
@@ -525,54 +520,6 @@ function updateTipText(html) {
   void tipEl.offsetWidth;
   tipEl.innerHTML = html;
   tipEl.classList.add('tip-animate');
-}
-
-function generateRoadmap() {
-  const name = document.getElementById('inp-name').value.trim();
-  const grade = document.getElementById('inp-grade').value;
-  const courseKey = document.getElementById('inp-course').value;
-  const progInput = document.querySelector('input[name="prog"]:checked');
-  const prog = progInput ? progInput.value : null;
-  const data = CURRICULUM[courseKey];
-
-  document.getElementById('r-name').textContent = name;
-  document.getElementById('r-meta').textContent = `${grade}th Grade · ${data.label}`;
-
-  const badgeEl = document.getElementById('r-badge');
-  const badges = {
-    lost: ['Needs Foundation','badge-coral'],
-    gaps: ['Bridging Gaps','badge-amber'],
-    shaky: ['Polishing','badge-teal']
-  };
-  badgeEl.textContent = badges[prog][0];
-  badgeEl.className = 'badge ' + badges[prog][1];
-
-  const milestones = data[prog];
-  const gaps = milestones.filter(m => m.phase === 'gap');
-  const nexts = milestones.filter(m => m.phase === 'next');
-
-  renderList(gaps, 'gaps-list');
-  renderList(nexts, 'next-list');
-  
-  currentDefaultTip = `<strong>Study Strategy:</strong> ${data.tip[prog] || "Focus on consistent daily review."}`;
-  updateTipText(currentDefaultTip);
-  updateProgress();
-
-  document.getElementById('s-diag').classList.remove('active');
-  document.getElementById('s-roadmap').classList.add('active');
-  // --- FULLSTACK ADDITION 2: SAVE TO POSTGRESQL ---
-  // Format the track name for the database (e.g., "Algebra I (Needs Foundation)")
-  const dbTrackName = `${data.label} (${badges[prog][0]})`;
-
-  fetch('/save-track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: currentUser, track: dbTrackName })
-  })
-  .then(response => response.json())
-  .then(dbData => console.log("Vault Success:", dbData.message))
-  .catch(error => console.error("Vault Error:", error));
-  // ------------------------------------------------
 }
 
 function renderList(items, containerId) {
@@ -624,3 +571,94 @@ function goBack() {
 }
 
 document.getElementById('inp-name').oninput = validateForm;
+
+
+// ==================== FULL-STACK BACKEND WIRES ====================
+
+function generateRoadmap() {
+  const name = document.getElementById('inp-name').value.trim();
+  const grade = document.getElementById('inp-grade').value;
+  const courseKey = document.getElementById('inp-course').value;
+  const progInput = document.querySelector('input[name="prog"]:checked');
+  const prog = progInput ? progInput.value : null;
+  
+  const structuredTrackSignature = `${courseKey}|${prog}`;
+
+  buildRoadmapUI(name, grade, courseKey, prog);
+
+  const currentLoggedInUser = localStorage.getItem('username') || name; 
+
+  fetch('/save-track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: currentLoggedInUser,
+      track: structuredTrackSignature
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log('🔄 Cloud Sync Completed:', data.message))
+  .catch(err => console.error('❌ Cloud Sync failed, relying on client runtime:', err));
+}
+
+function buildRoadmapUI(name, grade, courseKey, prog) {
+  const data = CURRICULUM[courseKey];
+  if (!data) return;
+
+  document.getElementById('r-name').textContent = name;
+  document.getElementById('r-meta').textContent = `${grade}th Grade · ${data.label}`;
+
+  const badgeEl = document.getElementById('r-badge');
+  const badges = {
+    lost: ['Needs Foundation', 'badge-coral'],
+    gaps: ['Bridging Gaps', 'badge-amber'],
+    shaky: ['Polishing', 'badge-teal']
+  };
+  badgeEl.textContent = badges[prog][0];
+  badgeEl.className = 'badge ' + badges[prog][1];
+
+  const milestones = data[prog];
+  const gaps = milestones.filter(m => m.phase === 'gap');
+  const nexts = milestones.filter(m => m.phase === 'next');
+
+  renderList(gaps, 'gaps-list');
+  renderList(nexts, 'next-list');
+  
+  currentDefaultTip = `<strong>Study Strategy:</strong> ${data.tip[prog] || "Focus on consistent daily review."}`;
+  updateTipText(currentDefaultTip);
+  updateProgress();
+
+  document.getElementById('s-diag').classList.remove('active');
+  document.getElementById('s-roadmap').classList.add('active');
+}
+
+async function checkExistingUserRoadmap() {
+  const activeUser = localStorage.getItem('username');
+  if (!activeUser) return; 
+
+  try {
+    const response = await fetch('/api/students');
+    const roster = await response.json();
+    
+    const userProfile = roster.find(student => student.username === activeUser);
+    
+    if (userProfile && userProfile.roadmap_track) {
+      const [savedCourse, savedProg] = userProfile.roadmap_track.split('|');
+      
+      if (CURRICULUM[savedCourse]) {
+        console.log(`🎯 Found existing ecosystem roadmap for ${activeUser}. Hydrating cloud data...`);
+        
+        let parsedGrade = "9";
+        if (["geometry", "chemistry", "us_hist", "english10"].includes(savedCourse)) parsedGrade = "10";
+        if (["algebra2", "physics", "usgov", "english11"].includes(savedCourse)) parsedGrade = "11";
+        if (["precalc", "ap_stats", "econ", "english12"].includes(savedCourse)) parsedGrade = "12";
+
+        buildRoadmapUI(activeUser, parsedGrade, savedCourse, savedProg);
+      }
+    }
+  } catch (error) {
+    console.warn("Could not auto-hydrate roadmap view from cloud server network context.", error);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', checkExistingUserRoadmap);
