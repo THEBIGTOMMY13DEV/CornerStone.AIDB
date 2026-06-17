@@ -79,7 +79,7 @@ async function handleLogin() {
             if (data.role === 'Staff' || data.role === 'Admin') {
                 window.location.href = '/Dashboard/Staff/dashboard.html'; // Points to your staff subfolder path
             } else {
-                window.location.href = '/RoadMap/roadmap.html'; // Points directly to your Roadmap subfolder file
+                window.location.href = '/Dashboard/Student/dashboard.html'; // Points directly to your Roadmap subfolder file
             }
         }, 1000);
 
