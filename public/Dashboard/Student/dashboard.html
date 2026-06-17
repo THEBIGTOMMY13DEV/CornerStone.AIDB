@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cornerstone LMS | Student Portal</title>
+  <link rel="stylesheet" href="./student-style.css">
+  <style>
+    /* Quiz Specific Interface Extensions */
+    .quiz-card {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--stone-border);
+      padding: 2.5rem;
+      max-width: 650px;
+      margin: 2rem auto;
+      box-shadow: var(--shadow-md);
+      animation: formEntry 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    .quiz-options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 1.5rem 0;
+    }
+    .quiz-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1.5px solid var(--stone-border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quiz-row:hover {
+      background-color: var(--stone-light);
+      border-color: var(--stone-mid);
+    }
+    .quiz-row input[type="radio"] {
+      accent-color: var(--teal-mid);
+      width: 18px;
+      height: 18px;
+    }
+    .quiz-text-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .hidden { display: none !important; }
+    
+    @keyframes formEntry {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="lms-wrapper">
+    <aside class="lms-sidebar">
+      <div class="lms-logo">Cornerstone Portal</div>
+      <nav class="lms-nav">
+        <a href="#" class="active" id="nav-dash" onclick="switchTab('dashboard')">💻 Dashboard</a>
+        <a href="#" id="nav-courses" onclick="switchTab('courses')">📚 My Courses</a>
+        <a href="#" id="nav-tasks" onclick="switchTab('tasks')">📝 Assignments</a>
+      </nav>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </aside>
+
+    <main class="lms-content">
+      <header class="lms-header">
+        <div>
+          <h1 id="welcome-title">Welcome Back, Student</h1>
+          <p class="subtitle">Academic Year 2026/2027 · Live Cloud Database Synced</p>
+        </div>
+        <div class="user-avatar" id="user-display">S</div>
+      </header>
+
+      <div id="quiz-view" class="quiz-card hidden">
+        <h2 style="font-size: 22px; margin-bottom: 0.5rem;">Academic Intake Evaluation</h2>
+        <p class="subtitle">Please fill out this quick evaluation to customize your primary LMS statistical dashboard tracking matrix.</p>
+        
+        <div style="margin-top: 2rem;">
+          <h3 id="question-text" style="font-size: 16px; font-weight: 700; color: var(--stone);">Loading evaluation stream...</h3>
+          <div class="quiz-options-group" id="options-box"></div>
+          
+          <button class="logout-btn" style="background: var(--stone); color: var(--white); width: auto; padding: 12px 24px; font-weight: 600; margin-top: 1rem;" onclick="processNextQuestion()">
+            Submit Answer & Continue →
+          </button>
+        </div>
+      </div>
+
+      <div id="dashboard-view" class="hidden">
+        <section class="metrics-grid">
+          <div class="metric-card">
+            <div class="m-label">Your Live GPA</div>
+            <div class="m-value" id="stat-gpa">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label">Active Courses</div>
+            <div class="m-value" id="stat-courses">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label">Pending Deadlines</div>
+            <div class="m-value" style="color: var(--coral-mid);" id="stat-tasks">--</div>
+          </div>
+        </section>
+
+        <div class="workspace-grid">
+          <div class="card">
+            <h3>Registered Core Classes</h3>
+            <div class="course-list" id="dash-course-list"></div>
+          </div>
+          <div class="card">
+            <h3>Upcoming Academic Targets</h3>
+            <div class="task-list" id="dash-task-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="courses-view" style="display: none;" class="card">
+        <h3>Full Course Curriculum Package</h3>
+        <div class="course-list" id="full-course-list" style="margin-top: 1.5rem;"></div>
+      </div>
+
+      <div id="tasks-view" style="display: none;" class="card">
+        <h3>LMS Homework Submission Center</h3>
+        <div class="task-list" id="full-task-list" style="margin-top: 1.5rem;"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const sessionUser = localStorage.getItem('username');
+    const sessionRole = localStorage.getItem('role');
+
+    // Intake Questionnaire Layout Struct
+    const QUESTIONNAIRE = [
+      { q: "What is your typical target letter grade bracket across recent terms?", choices: [{t:"As and Bs consistently", p:4.0}, {t:"Bs and Cs mostly", p:3.0}, {t:"Struggling with passing standard baseline lines", p:2.0}] },
+      { q: "What is your target workload registration count this semester?", choices: [{t:"4 core classes", p:4}, {t:"5 core classes", p:5}, {t:"6 comprehensive classes", p:6}] },
+      { q: "How many outstanding course assignments are currently on your desk?", choices: [{t:"Zero, my tasks are fully submitted", p:0}, {t:"1 to 2 loose deadline tasks", p:2}, {t:"3 or more major backed up milestones", p:5}] }
+    ];
+
+    let currentQuestionPointer = 0;
+    let computedDataResults = { scoreGpa: 4.0, classCount: 4, taskCount: 0 };
+
+    const BASE_CLASSES = [
+      { title: "Advanced Algebra II", teacher: "Dr. Harrison", grade: "A-" },
+      { title: "AP United States History", teacher: "Mrs. Davis", grade: "B+" },
+      { title: "Honors Biology", teacher: "Mr. Mercer", grade: "A" },
+      { title: "English Literature 10", teacher: "Ms. Finch", grade: "A-" },
+      { title: "Introduction to Computer Science", teacher: "Mr. Vance", grade: "A+" }
+    ];
+
+    const BASE_TASKS = [
+      { name: "Biology Lab: Mitosis Analysis", due: "Due Tomorrow at 11:59 PM", alert: true },
+      { name: "History Reading Reflection Chapter 14", due: "Due Friday, June 19th", alert: false },
+      { name: "Algebra Problem Set #8", due: "Due next Monday", alert: false },
+      { name: "English Essay First Draft", due: "Due in 5 days", alert: true }
+    ];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Identity Protection Gatekeeper Router Check
+      if (!sessionUser || sessionRole !== 'Student') {
+        alert('Access Denied. Identity validation mapping failed.');
+        window.location.href = '/Login/';
+        return;
+      }
+
+      document.getElementById('welcome-title').textContent = `Welcome Back, ${sessionUser}`;
+      document.getElementById('user-display').textContent = sessionUser.charAt(0).toUpperCase();
+
+      await loadSynchronizedProfile();
+    });
+
+    async function loadSynchronizedProfile() {
+      try {
+        const response = await fetch('/api/students');
+        const studentRoster = await response.json();
+        const matchedProfile = studentRoster.find(s => s.username === sessionUser);
+
+        // Evaluate whether database profile metrics are initialized
+        if (matchedProfile && (parseFloat(matchedProfile.gpa) > 0 || matchedProfile.pending_deadlines > 0 || matchedProfile.active_courses > 4)) {
+          displayMainLmsDashboard(matchedProfile.gpa, matchedProfile.active_courses, matchedProfile.pending_deadlines);
+        } else {
+          // Zeroed out or missing database column metrics -> Mount Diagnostic Screen View
+          document.getElementById('dashboard-view').classList.add('hidden');
+          document.getElementById('quiz-view').classList.remove('hidden');
+          mountDiagnosticQuestion();
+        }
+      } catch (err) {
+        console.error("Critical error mapping live cloud streams:", err);
+      }
+    }
+
+    function mountDiagnosticQuestion() {
+      const activeQuestion = QUESTIONNAIRE[currentQuestionPointer];
+      document.getElementById('question-text').textContent = activeQuestion.q;
+      
+      const box = document.getElementById('options-box');
+      box.innerHTML = '';
+      
+      activeQuestion.choices.forEach((choice, idx) => {
+        box.innerHTML += `
+          <label class="quiz-row">
+            <input type="radio" name="diag-choice" value="${choice.p}" ${idx === 0 ? 'checked' : ''}>
+            <span class="quiz-text-label">${choice.t}</span>
+          </label>`;
+      });
+    }
+
+    async function processNextQuestion() {
+      const selectedRadioValue = parseFloat(document.querySelector('input[name="diag-choice"]:checked').value);
+
+      if (currentQuestionPointer === 0) computedDataResults.scoreGpa = selectedRadioValue === 4 ? 3.85 : selectedRadioValue === 3 ? 2.95 : 1.85;
+      if (currentQuestionPointer === 1) computedDataResults.classCount = selectedRadioValue;
+      if (currentQuestionPointer === 2) computedDataResults.taskCount = selectedRadioValue;
+
+      currentQuestionPointer++;
+      if (currentQuestionPointer < QUESTIONNAIRE.length) {
+        mountDiagnosticQuestion();
+      } else {
+        await transmitMetricsToCloudCluster();
+      }
+    }
+
+    async function transmitMetricsToCloudCluster() {
+      // Add subtle randomized decimal trailing variations for unique realistic grading tracking signatures
+      const dynamicGpa = (computedDataResults.scoreGpa + (Math.random() * 0.14)).toFixed(2);
+      
+      try {
+        const response = await fetch('/api/update-stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: sessionUser,
+            gpa: dynamicGpa,
+            active_courses: computedDataResults.classCount,
+            pending_deadlines: computedDataResults.taskCount
+          })
+        });
+
+        if (response.ok) {
+          document.getElementById('quiz-view').classList.add('hidden');
+          displayMainLmsDashboard(dynamicGpa, computedDataResults.classCount, computedDataResults.taskCount);
+        }
+      } catch (err) {
+        console.error("Telemetry write tracking update rejected:", err);
+      }
+    }
+
+    function displayMainLmsDashboard(gpa, courses, tasks) {
+      document.getElementById('stat-gpa').textContent = gpa;
+      document.getElementById('stat-courses').textContent = courses;
+      document.getElementById('stat-tasks').textContent = tasks;
+
+      // Populate interactive lists
+      const dashCourseList = document.getElementById('dash-course-list');
+      const dashTaskList = document.getElementById('dash-task-list');
+      
+      dashCourseList.innerHTML = '';
+      dashTaskList.innerHTML = '';
+
+      BASE_CLASSES.slice(0, courses).forEach(c => {
+        dashCourseList.innerHTML += `
+          <div class="course-item">
+            <div>
+              <div class="c-title">${c.title}</div>
+              <div class="c-teacher">Instructor: ${c.teacher}</div>
+            </div>
+            <span class="grade-badge">${c.grade}</span>
+          </div>`;
+      });
+
+      BASE_TASKS.slice(0, tasks).forEach(t => {
+        dashTaskList.innerHTML += `
+          <div class="task-item ${t.alert ? 'urgent' : ''}" onclick="this.classList.toggle('done')">
+            <div>
+              <div class="t-name">${t.name}</div>
+              <div class="t-due">${t.due}</div>
+            </div>
+          </div>`;
+      });
+
+      // Synchronize detailed background category nodes
+      document.getElementById('full-course-list').innerHTML = dashCourseList.innerHTML;
+      document.getElementById('full-task-list').innerHTML = dashTaskList.innerHTML;
+
+      document.getElementById('dashboard-view').classList.remove('hidden');
+    }
+
+    function switchTab(viewId) {
+      document.querySelectorAll('.lms-nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(`nav-${viewId === 'dashboard' ? 'dash' : viewId === 'courses' ? 'courses' : 'tasks'}`).classList.add('active');
+
+      document.getElementById('dashboard-view').style.display = viewId === 'dashboard' ? 'block' : 'none';
+      document.getElementById('courses-view').style.display = viewId === 'courses' ? 'block' : 'none';
+      document.getElementById('tasks-view').style.display = viewId === 'tasks' ? 'block' : 'none';
+    }
+
+    function handleLogout() {
+      localStorage.clear();
+      window.location.href = '/Login/';
+    }
+  </script>
+</body>
+</html>

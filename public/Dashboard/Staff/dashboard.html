@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cornerstone LMS | Administration Panel</title>
+  <link rel="stylesheet" href="./staff-style.css">
+</head>
+<body>
+  <div class="lms-wrapper">
+    <aside class="lms-sidebar">
+      <div class="lms-logo">LMS Admin Console</div>
+      <nav class="lms-nav">
+        <a href="#" class="active">📊 Main Overview</a>
+      </nav>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </aside>
+
+    <main class="lms-content">
+      <header class="lms-header">
+        <div>
+          <h1 id="faculty-title">Faculty Command Control</h1>
+          <p class="subtitle">Ecosystem Monitoring Hub · Live Connection Status Active</p>
+        </div>
+      </header>
+
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="m-label">Registered Enrolments</div>
+          <div class="m-value" id="count-students">--</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-label">Platform Server Latency</div>
+          <div class="m-value" style="color: var(--teal-mid);">Active</div>
+        </div>
+      </section>
+
+      <div class="card">
+        <div class="table-header">
+          <div>
+            <h3>Registered System Students</h3>
+            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..." oninput="filterRosterTable()" style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
+          </div>
+          <button class="refresh-btn" onclick="fetchLiveRoster()">🔄 Refresh Roster</button>
+        </div>
+        
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th>Student Account</th>
+              <th>Live GPA</th>
+              <th>Class Load Count</th>
+              <th>Overdue Tasks</th>
+              <th>Ecosystem Tracking Signature</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="5" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Access token validator checkpoint block
+    document.addEventListener('DOMContentLoaded', () => {
+      const sessionUser = localStorage.getItem('username');
+      const sessionRole = localStorage.getItem('role');
+
+      if (!sessionUser || sessionRole !== 'Staff') {
+        alert('Access Denied. Identity validation token missing.');
+        window.location.href = '/Login/';
+        return;
+      }
+      
+      document.getElementById('faculty-title').textContent = `Faculty Control Terminal: ${sessionUser}`;
+      fetchLiveRoster();
+    });
+
+    async function fetchLiveRoster() {
+      const tbody = document.getElementById('table-body');
+      try {
+        const response = await fetch('/api/students');
+        const roster = await response.json();
+        
+        tbody.innerHTML = '';
+        document.getElementById('count-students').textContent = roster.length;
+
+        if (roster.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
+          return;
+        }
+
+        roster.forEach(student => {
+          const row = document.createElement('tr');
+          row.className = "student-row";
+          
+          // Fallbacks handle rendering default indicators if student hasn't taken their quiz yet
+          const displayGpa = student.gpa && parseFloat(student.gpa) > 0 ? parseFloat(student.gpa).toFixed(2) : 'Pending Quiz';
+          const displayCourses = student.active_courses && student.active_courses > 0 ? `${student.active_courses} Courses` : '4 Courses';
+          const displayTasks = student.pending_deadlines !== null && student.pending_deadlines !== undefined ? student.pending_deadlines : '0';
+
+          row.innerHTML = `
+            <td class="searchable-name"><strong>${student.username}</strong></td>
+            <td style="font-weight: 600; color: var(--teal-mid);">${displayGpa}</td>
+            <td>${displayCourses}</td>
+            <td style="font-weight: 600; color: ${parseInt(displayTasks) > 2 ? 'var(--coral-mid)' : 'inherit'}">${displayTasks} Tasks</td>
+            <td><code>${student.roadmap_track || 'No roadmap saved'}</code></td>
+          `;
+          tbody.appendChild(row);
+        });
+
+      } catch (err) {
+        console.error("Database table mapping exception:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="loading-placeholder" style="color:red;">Error fetching secure platform registry data.</td></tr>`;
+      }
+    }
+
+    function filterRosterTable() {
+      const query = document.getElementById('table-search').value.toLowerCase();
+      document.querySelectorAll('.student-row').forEach(row => {
+        const nameText = row.querySelector('.searchable-name').textContent.toLowerCase();
+        row.style.display = nameText.includes(query) ? '' : 'none';
+      });
+    }
+
+    function handleLogout() {
+      localStorage.clear();
+      window.location.href = '/Login/';
+    }
+  </script>
+</body>
+</html>
