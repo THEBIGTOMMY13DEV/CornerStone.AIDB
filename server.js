@@ -123,7 +123,31 @@ app.get('/api/students', async (req, res) => {
     res.status(500).json({ error: "Server error while fetching students." });
   }
 });
+// SECURE ENDPOINT: REMOVE A USER FROM THE SYSTEM
+app.delete('/api/students/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
 
+    // Prevent administrators from accidentally deleting themselves if they type their own name
+    if (req.body.adminUser === username) {
+      return res.status(400).json({ error: "Action denied. You cannot remove your own active session account." });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM users WHERE username = $1 AND role = 'Student' RETURNING username",
+      [username]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Student account not found in database registry." });
+    }
+
+    res.status(200).json({ message: `Successfully removed ${username} from the ecosystem.` });
+  } catch (err) {
+    console.error("Database deletion process exception:", err.message);
+    res.status(500).json({ error: "Server database execution failure." });
+  }
+});
 // 5. Start the engine
 app.listen(port, () => {
   console.log(`🚀 Cornerstone AI server is alive in the cloud on port ${port}`);

@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cornerstone LMS | Administration Panel</title>
   <link rel="stylesheet" href="./staff-style.css">
+  <style>
+    /* Styling button utility for the delete action */
+    .btn-delete {
+      background: #FFF5F2;
+      border: 1px solid #D85A30;
+      color: #D85A30;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-delete:hover {
+      background: #D85A30;
+      color: white;
+    }
+  </style>
 </head>
 <body>
   <div class="lms-wrapper">
@@ -49,11 +67,12 @@
             <tr>
               <th>Student Account</th>
               <th>Unified Academic Tracking Status</th>
+              <th style="text-align: right;">Management Actions</th>
             </tr>
           </thead>
           <tbody id="table-body">
             <tr>
-              <td colspan="2" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
+              <td colspan="3" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
             </tr>
           </tbody>
         </table>
@@ -81,9 +100,9 @@
       const sessionUser = localStorage.getItem('username');
       const sessionRole = localStorage.getItem('role');
 
-      if (!sessionUser || sessionRole !== 'Staff' && sessionRole !== 'Admin') {
+      if (!sessionUser || (sessionRole !== 'Staff' && sessionRole !== 'Admin')) {
         alert('Access Denied. Identity validation token missing.');
-        window.location.href = '/Login/Login.html';
+        window.location.href = '/Login/login.html';
         return;
       }
       
@@ -101,7 +120,7 @@
         document.getElementById('count-students').textContent = roster.length;
 
         if (roster.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="2" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
           return;
         }
 
@@ -131,13 +150,44 @@
           row.innerHTML = `
             <td class="searchable-name"><strong>${student.username}</strong></td>
             <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
+            <td style="text-align: right;">
+              <button class="btn-delete" onclick="removeStudentAccount('${student.username}')">Remove Student</button>
+            </td>
           `;
           tbody.appendChild(row);
         });
 
       } catch (err) {
         console.error("Database table mapping exception:", err);
-        tbody.innerHTML = `<tr><td colspan="2" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
+      }
+    }
+
+    // INTERACTIVE DELETE FRONTEND INTERCEPTOR WIRE
+    async function removeStudentAccount(targetUsername) {
+      const confirmation = confirm(`Are you completely sure you want to permanently delete the profile data for "${targetUsername}"? This action cannot be undone.`);
+      if (!confirmation) return;
+
+      const adminUser = localStorage.getItem('username');
+
+      try {
+        const response = await fetch(`/api/students/${targetUsername}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminUser })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to remove user account.");
+        }
+
+        alert(result.message);
+        await fetchLiveRoster(); // Automatically re-draw table rows post deletion instantly
+
+      } catch (err) {
+        alert(err.message);
       }
     }
 
@@ -151,7 +201,7 @@
 
     function handleLogout() {
       localStorage.clear();
-      window.location.href = '/Login/Login.html';
+      window.location.href = '/Login/login.html';
     }
   </script>
 </body>
