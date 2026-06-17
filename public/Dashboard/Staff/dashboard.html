@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cornerstone LMS | Administration Panel</title>
   <link rel="stylesheet" href="./staff-style.css">
 </head>
+
 <body>
   <div class="lms-wrapper">
     <aside class="lms-sidebar">
@@ -39,11 +41,13 @@
         <div class="table-header">
           <div>
             <h3>Registered Student Roadmaps</h3>
-            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..." oninput="filterRosterTable()" style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
+            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..."
+              oninput="filterRosterTable()"
+              style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
           </div>
           <button class="refresh-btn" onclick="fetchLiveRoster()">🔄 Refresh Roster</button>
         </div>
-        
+
         <table class="roster-table">
           <thead>
             <tr>
@@ -87,7 +91,7 @@
         window.location.href = '/Login/login.html';
         return;
       }
-      
+
       document.getElementById('faculty-title').textContent = `Faculty Control Terminal: ${sessionUser}`;
       fetchLiveRoster();
     });
@@ -97,7 +101,7 @@
       try {
         const response = await fetch('/api/students');
         const roster = await response.json();
-        
+
         tbody.innerHTML = '';
         document.getElementById('count-students').textContent = roster.length;
 
@@ -109,28 +113,33 @@
         roster.forEach(student => {
           const row = document.createElement('tr');
           row.className = "student-row";
-          
-          let courseText = "Not Started";
-          let statusHtml = `<span class="status-indicator" style="background:#f0f0f0; color:#666;">Pending</span>`;
 
-          // Safely decode the database telemetry string "courseKey|prog"
+          let courseText = "Not Started";
+          let statusText = "Pending";
+          let combinedOutput = "Not Started (Pending)";
+
+          // Safely decode the database telemetry string "courseKey|progKey"
           if (student.roadmap_track && student.roadmap_track.includes('|')) {
             const [courseKey, progKey] = student.roadmap_track.split('|');
-            
+
+            // 1. Look up the pretty names from your dictionaries
             if (COURSE_LABELS[courseKey]) {
               courseText = COURSE_LABELS[courseKey];
             }
             if (STATUS_LABELS[progKey]) {
-              statusHtml = `<span class="status-indicator ${STATUS_LABELS[progKey].class}">${STATUS_LABELS[progKey].text}</span>`;
+              statusText = STATUS_LABELS[progKey].text;
             }
+
+            // 2. Combine them into your exact requested format
+            combinedOutput = `${courseText} (${statusText})`;
           }
 
+          // Render the unified string cleanly into a single table cell
           row.innerHTML = `
-            <td class="searchable-name"><strong>${student.username}</strong></td>
-            <td>${courseText}</td>
-            <td>${statusHtml}</td>
-            <td><code>${student.roadmap_track || 'empty'}</code></td>
-          `;
+    <td class="searchable-name"><strong>${student.username}</strong></td>
+    <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
+    <td><code>${student.roadmap_track || 'empty'}</code></td>
+  `;
           tbody.appendChild(row);
         });
 
@@ -154,4 +163,5 @@
     }
   </script>
 </body>
+
 </html>
