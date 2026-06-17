@@ -116,30 +116,36 @@ app.get('/api/students', async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT username, role, roadmap_track, behavior_points, school_level,
-       COALESCE(gpa, 4.00) as gpa, 
+       COALESCE(gpa, 0.00) as gpa, 
        COALESCE(active_courses, 4) as active_courses, 
-       COALESCE(pending_deadlines, 0) as pending_deadlines 
+       COALESCE(pending_deadlines, 0) as pending_deadlines,
+       COALESCE(sat_math, 0) as sat_math,
+       COALESCE(sat_reading, 0) as sat_reading,
+       COALESCE(sat_science, 0) as sat_science
        FROM users WHERE role = 'Student' ORDER BY username ASC`
     );
     res.status(200).json(result.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "Server error while fetching student records." });
+    res.status(500).json({ error: "Server database extraction failure." });
   }
 });
 app.post('/api/update-stats', async (req, res) => {
   try {
-    const { username, gpa, active_courses, pending_deadlines } = req.body;
+    const { username, gpa, active_courses, pending_deadlines, sat_math, sat_reading, sat_science } = req.body;
 
     await pool.query(
-      "UPDATE users SET gpa = $1, active_courses = $2, pending_deadlines = $3 WHERE username = $4",
-      [gpa, active_courses, pending_deadlines, username]
+      `UPDATE users 
+       SET gpa = $1, active_courses = $2, pending_deadlines = $3, 
+           sat_math = $4, sat_reading = $5, sat_science = $6 
+       WHERE username = $7`,
+      [gpa, active_courses, pending_deadlines, sat_math, sat_reading, sat_science, username]
     );
 
-    res.status(200).json({ message: "Student LMS statistics updated successfully!" });
+    res.status(200).json({ message: "SAT Diagnostic tracking matrix synchronized successfully!" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "Server error while updating student stats." });
+    res.status(500).json({ error: "Server error updating benchmark telemetry." });
   }
 });
 // SECURE ENDPOINT: REMOVE A USER FROM THE SYSTEM

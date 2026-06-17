@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cornerstone LMS | Student Portal</title>
+  <title>Cornerstone LMS | Student Portal & SAT Assessment</title>
   <link rel="stylesheet" href="./student-style.css">
-  <link rel="stylesheet" href="./RoadMap/roadmapstyle.css">
+  <link rel="stylesheet" href="../Roadmap/style.css">
   <style>
     body { display: block; overflow: auto; }
     .hidden { display: none !important; }
     
-    /* Quiz Specific Interface Elements */
+    /* SAT Diagnostic Exam Interface Elements */
     .quiz-card {
-      background: var(--white, #FFFFFF);
+      background: #FFFFFF;
       border-radius: 16px;
-      border: 1px solid var(--stone-border, #E5E3D8);
+      border: 1px solid #E5E3D8;
       padding: 2.5rem;
       max-width: 680px;
       margin: 2rem auto;
@@ -32,19 +32,19 @@
       align-items: center;
       gap: 12px;
       padding: 16px;
-      border: 1.5px solid var(--stone-border, #E5E3D8);
+      border: 1.5px solid #E5E3D8;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .quiz-row:hover {
-      background-color: var(--stone-light, #F8F7F2);
-      border-color: var(--stone-mid, #6B6A63);
+      background-color: #F8F7F2;
+      border-color: #6B6A63;
     }
     .quiz-row input[type="radio"] {
       width: 18px;
       height: 18px;
-      accent-color: var(--stone, #1A1A18);
+      accent-color: #1A1A18;
     }
     .quiz-label-text {
       font-size: 14px;
@@ -53,7 +53,7 @@
     .quiz-progress-indicator {
       font-size: 12px;
       font-weight: 700;
-      color: var(--stone-mid, #6B6A63);
+      color: #6B6A63;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 0.5rem;
@@ -85,13 +85,13 @@
       </header>
 
       <div id="quiz-view" class="quiz-card hidden">
-        <div class="quiz-progress-indicator" id="quiz-step-tracker">Question 1 of 4</div>
+        <div class="quiz-progress-indicator" id="quiz-step-tracker">SAT Assessment Block</div>
         <h2 id="question-text" style="font-size: 20px; margin-bottom: 0.5rem; font-family: var(--sans);">Loading query baseline...</h2>
         <p class="subtitle" id="question-desc">Select the response that best aligns with your current academic standing.</p>
         
         <div class="quiz-options-group" id="options-box"></div>
         
-        <button class="cta" style="background: var(--stone, #1A1A18); color: white; width: auto; padding: 12px 28px;" onclick="processQuizAnswer()">
+        <button class="cta" style="background: #1A1A18; color: white; width: auto; padding: 12px 28px;" onclick="processQuizAnswer()">
           Submit Answer & Continue →
         </button>
       </div>
@@ -236,20 +236,46 @@
     </main>
   </div>
 
-  <script src="./RoadMap/roadmapscript.js"></script>
+  <script src="../Roadmap/script.js"></script>
   <script>
     const sessionUser = localStorage.getItem('username');
 
-    // The Complex Evaluation Quiz Matrix Structure
+    // SAT Diagnostic Question Matrix mapping specific subject area tags
     const DIAG_QUIZ = [
-      { q: "What is your typical historical test grade performance?", d: "Helps approximate baseline GPA distributions.", choices: [{t: "Mostly A range scores", v: 3.9}, {t: "B to C range tracking", v: 2.9}, {t: "Struggling to maintain passing scores", v: 1.8}] },
-      { q: "How many active subjects are you currently taking?", d: "Maps total resource allocation demands.", choices: [{t: "4 standard courses", v: 4}, {t: "5 courses", v: 5}, {t: "6 or more intensive blocks", v: 6}] },
-      { q: "What is the volume of your current outstanding homework backlog?", d: "Evaluates pending system milestone bottlenecks.", choices: [{t: "Completely caught up", v: 0}, {t: "1 to 2 loose assignments outstanding", v: 2}, {t: "3 or more major backed up deadlines", v: 4}] },
-      { q: "How much time do you allocate daily to targeted study revision?", d: "Refines fraction parameters to generate a realistic GPA.", choices: [{t: "Over 2 hours daily", v: 0.08}, {t: "1 hour daily", v: 0.04}, {t: "Inconsistent study habits", v: 0.00}] }
+      { 
+        q: "Solve for x: 3x - 7 = 14.", 
+        d: "Math Section: Linear Equations", 
+        subject: "math",
+        choices: [{t: "x = 5", v: 0}, {t: "x = 7", v: 1}, {t: "x = 21", v: 0}, {t: "x = 3", v: 0}] 
+      },
+      { 
+        q: "If f(x) = x² - 4, what is f(-3)?", 
+        d: "Math Section: Advanced Functions", 
+        subject: "math",
+        choices: [{t: "5", v: 1}, {t: "-13", v: 0}, {t: "13", v: 0}, {t: "-7", v: 0}] 
+      },
+      { 
+        q: "Which word best completes the sentence: 'The scientist's theories were ______ by new empirical data.'", 
+        d: "Reading & Writing: Contextual Vocabulary", 
+        subject: "reading",
+        choices: [{t: "Corroborated", v: 1}, {t: "Diminished", v: 0}, {t: "Contradicted", v: 0}, {t: "Mitigated", v: 0}] 
+      },
+      { 
+        q: "Identify the grammatical error: 'The flock of geese were flying south for the winter.'", 
+        d: "Reading & Writing: Subject-Verb Agreement", 
+        subject: "reading",
+        choices: [{t: "Change 'were' to 'was'", v: 1}, {t: "Change 'geese' to 'gooses'", v: 0}, {t: "No error", v: 0}] 
+      },
+      { 
+        q: "A student observes that a chemical reaction bubbles vigorously. What does this indicate?", 
+        d: "Science Section: Experimental Interpretation", 
+        subject: "science",
+        choices: [{t: "Production of a gaseous byproduct", v: 1}, {t: "An endothermic decrease", v: 0}, {t: "A physical phase compression", v: 0}] 
+      }
     ];
 
     let quizIndex = 0;
-    let quizAccumulator = { baseGpa: 0.0, courses: 4, tasks: 0, bonus: 0.0 };
+    let rawScores = { math: 0, reading: 0, science: 0 };
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!sessionUser) { window.location.href = '/Login/'; return; }
@@ -267,69 +293,83 @@
         const roster = await response.json();
         const profile = roster.find(s => s.username === sessionUser);
 
-        // If stats exist and are above default zero values, load directly into dashboard view
-        if (profile && (parseFloat(profile.gpa) > 0 || profile.pending_deadlines > 0)) {
+        // If GPA is 0, they haven't taken the SAT placement exam yet
+        if (profile && parseFloat(profile.gpa) > 0) {
           hydrateDashboardLayout(profile.gpa, profile.active_courses, profile.pending_deadlines);
         } else {
-          // New student -> Force diagnostic quiz view
           document.getElementById('view-dashboard').classList.add('hidden');
           document.getElementById('quiz-view').classList.remove('hidden');
           renderQuizQuestion();
         }
       } catch (err) {
-        console.error("Database tracking link exception: ", err);
+        console.error("Database sync runtime failure:", err);
       }
     }
 
     function renderQuizQuestion() {
       const activeNode = DIAG_QUIZ[quizIndex];
-      document.getElementById('quiz-step-tracker').textContent = `Question ${quizIndex + 1} of ${DIAG_QUIZ.length}`;
+      document.getElementById('quiz-step-tracker').textContent = `SAT Assessment Block - Question ${quizIndex + 1} of ${DIAG_QUIZ.length}`;
       document.getElementById('question-text').textContent = activeNode.q;
       document.getElementById('question-desc').textContent = activeNode.d;
 
       const box = document.getElementById('options-box');
       box.innerHTML = '';
-      activeNode.choices.forEach((opt, index) => {
+      activeNode.choices.forEach((opt) => {
         box.innerHTML += `
           <label class="quiz-row">
-            <input type="radio" name="quiz-input-node" value="${opt.v}" ${index === 0 ? 'checked' : ''}>
+            <input type="radio" name="quiz-input-node" value="${opt.v}">
             <span class="quiz-label-text">${opt.t}</span>
           </label>`;
       });
     }
 
     async function processQuizAnswer() {
-      const choiceValue = parseFloat(document.querySelector('input[name="quiz-input-node"]:checked').value);
+      const selectedInput = document.querySelector('input[name="quiz-input-node"]:checked');
+      if (!selectedInput) { alert("Please select an option to proceed."); return; }
+      
+      const isCorrect = parseInt(selectedInput.value);
+      const currentSubject = DIAG_QUIZ[quizIndex].subject;
 
-      if (quizIndex === 0) quizAccumulator.baseGpa = choiceValue;
-      if (quizIndex === 1) quizAccumulator.courses = choiceValue;
-      if (quizIndex === 2) quizAccumulator.tasks = choiceValue;
-      if (quizIndex === 3) quizAccumulator.bonus = choiceValue;
+      if (isCorrect === 1) {
+        rawScores[currentSubject]++;
+      }
 
       quizIndex++;
       if (quizIndex < DIAG_QUIZ.length) {
         renderQuizQuestion();
       } else {
-        // Quiz completed -> calculate and transmit metrics to Postgres via server
-        const aggregateGpa = (quizAccumulator.baseGpa + quizAccumulator.bonus).toFixed(2);
-        await transmitQuizMetrics(aggregateGpa, quizAccumulator.courses, quizAccumulator.tasks);
-      }
-    }
+        // SAT Scaling Calculation Logic: Base scaled score (200) + (Correct / Max Questions) * 600
+        const finalMath = 200 + Math.round((rawScores.math / 2) * 600);
+        const finalReading = 200 + Math.round((rawScores.reading / 2) * 600);
+        const finalScience = 200 + Math.round((rawScores.science / 1) * 600);
 
-    async function transmitQuizMetrics(gpa, courses, tasks) {
-      try {
-        const response = await fetch('/api/update-stats', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: sessionUser, gpa, active_courses: courses, pending_deadlines: tasks })
-        });
+        // Composite Score Mapping to generate realistic local High School GPA equivalents
+        const totalComposite = finalMath + finalReading;
+        const computedGpa = ((totalComposite / 1600) * 4.0).toFixed(2);
 
-        if (response.ok) {
-          document.getElementById('quiz-view').classList.add('hidden');
-          hydrateDashboardLayout(gpa, courses, tasks);
+        // Post data to our database schema layout
+        try {
+          const response = await fetch('/api/update-stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: sessionUser,
+              gpa: computedGpa,
+              active_courses: 4,
+              pending_deadlines: 2,
+              sat_math: finalMath,
+              sat_reading: finalReading,
+              sat_science: finalScience
+            })
+          });
+
+          if (response.ok) {
+            document.getElementById('quiz-view').classList.add('hidden');
+            hydrateDashboardLayout(computedGpa, 4, 2);
+          }
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error("Telemetry pipeline execution error: ", err);
       }
     }
 
@@ -338,7 +378,6 @@
       document.getElementById('stat-courses').textContent = courses;
       document.getElementById('stat-tasks').textContent = tasks;
 
-      // Handle custom grade badge assignment letter tracking
       const numericGpa = parseFloat(gpa);
       let letter = "A";
       if (numericGpa < 3.5) letter = "B";
@@ -361,7 +400,7 @@
       }
     }
 
-    function handleLogout() { localStorage.clear(); window.location.href = '/Login/login.html'; }
+    function handleLogout() { localStorage.clear(); window.location.href = '/Login/'; }
   </script>
 </body>
 </html>
