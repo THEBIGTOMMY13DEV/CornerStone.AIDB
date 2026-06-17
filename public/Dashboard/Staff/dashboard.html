@@ -3,85 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cornerstone LMS | Administration Panel</title>
+  <title>Cornerstone LMS | Enterprise Institutional Console</title>
   <link rel="stylesheet" href="./staff-style.css">
   <style>
-    /* Styling button utility for the delete action */
-    .btn-delete {
-      background: #FFF5F2;
-      border: 1px solid #D85A30;
-      color: #D85A30;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-delete:hover {
-      background: #D85A30;
-      color: white;
-    }
+    /* Framework Tab & Utility Extensions */
+    .admin-grid-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .sub-tabs { display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 2px solid var(--stone-border); padding-bottom: 10px; }
+    .tab-trigger { background: none; border: none; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--stone-mid); padding: 8px 16px; cursor: pointer; border-radius: 6px; }
+    .tab-trigger.active { background: var(--stone); color: var(--white); }
+    .hidden-panel { display: none !important; }
+    
+    .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+    .btn-danger { background: #FFF5F2; border-color: #D85A30; color: #D85A30; }
+    .btn-danger:hover { background: #D85A30; color: white; }
+    .btn-warn { background: #FFF9ED; border-color: #BA7517; color: #BA7517; }
+    .btn-warn:hover { background: #BA7517; color: white; }
+    
+    .filter-select { height: 36px; padding: 0 10px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-family: var(--sans); font-size: 13px; outline: none; }
   </style>
 </head>
 <body>
-  <div class="lms-wrapper">
-    <aside class="lms-sidebar">
-      <div class="lms-logo">LMS Admin Console</div>
-      <nav class="lms-nav">
-        <a href="#" class="active">📊 Main Overview</a>
+  <div class="admin-grid-layout">
+    <aside class="lms-sidebar" style="background: #111; color: #fff; padding: 2rem 1.5rem;">
+      <div class="lms-logo" style="font-size: 18px; font-weight:700; margin-bottom: 2.5rem; letter-spacing:0.05em;">CORNERSTONE ADMIN</div>
+      <nav class="lms-nav" style="display:flex; flex-direction:column; gap:10px;">
+        <a href="#" class="active">🏫 Campus Management</a>
       </nav>
-      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      <button class="logout-btn" onclick="handleLogout()" style="margin-top:auto;">Logout</button>
     </aside>
 
-    <main class="lms-content">
-      <header class="lms-header">
+    <main class="lms-content" style="padding: 3rem; background: #F8F7F2;">
+      <header class="lms-header" style="margin-bottom: 2rem;">
         <div>
           <h1 id="faculty-title">Faculty Command Control</h1>
-          <p class="subtitle">Ecosystem Monitoring Hub · Live Connection Status Active</p>
+          <p class="subtitle">Multi-Level Institutional Dashboard Hub · Real-Time DB Active</p>
         </div>
       </header>
 
-      <section class="metrics-grid">
-        <div class="metric-card">
-          <div class="m-label">Registered Enrolments</div>
-          <div class="m-value" id="count-students">--</div>
+      <div class="sub-tabs">
+        <button class="tab-trigger active" id="btn-tab-roster" onclick="toggleSubPanel('roster')">👥 Student Roster Matrix</button>
+        <button class="tab-trigger" id="btn-tab-behavior" onclick="toggleSubPanel('behavior')">🛡️ Behavior & Conduct Registry</button>
+        <button class="tab-trigger" id="btn-tab-academics" onclick="toggleSubPanel('academics')">📊 Academic Grading Analytics</button>
+      </div>
+
+      <section class="metrics-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-bottom: 2rem;">
+        <div class="metric-card" style="background:#fff; padding:1.5rem; border:1px solid #DFDDD3; border-radius:10px;">
+          <div class="m-label" style="font-size:11px; color:#5A5A55; font-weight:700;">TOTAL CAMPUS ENROLMENTS</div>
+          <div class="m-value" id="count-students" style="font-size:28px; font-weight:700; margin-top:5px;">--</div>
         </div>
-        <div class="metric-card">
-          <div class="m-label">Platform Server Latency</div>
-          <div class="m-value" style="color: var(--teal-mid);">Active</div>
+        <div class="metric-card" style="background:#fff; padding:1.5rem; border:1px solid #DFDDD3; border-radius:10px;">
+          <div class="m-label" style="font-size:11px; color:#5A5A55; font-weight:700;">INSTITUTION STATUS</div>
+          <div class="m-value" style="font-size:24px; font-weight:700; color:#168260; margin-top:5px;">Operational</div>
+        </div>
+        <div class="metric-card" style="background:#fff; padding:1.5rem; border:1px solid #DFDDD3; border-radius:10px;">
+          <div class="m-label" style="font-size:11px; color:#5A5A55; font-weight:700;">CAMPUS DIVISION LEVEL</div>
+          <select id="division-filter" class="filter-select" style="margin-top:8px; width:100%;" onchange="applyTierFilters()">
+            <option value="All">All Divisions (K-12 Network)</option>
+            <option value="High School">High School Tier</option>
+            <option value="Middle School">Middle School Tier</option>
+            <option value="Elementary School">Elementary School Tier</option>
+          </select>
         </div>
       </section>
 
-      <div class="card">
-        <div class="table-header">
-          <div>
-            <h3>Registered Student Roadmaps</h3>
-            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..." oninput="filterRosterTable()" style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
-          </div>
-          <button class="refresh-btn" onclick="fetchLiveRoster()">🔄 Refresh Roster</button>
-        </div>
-        
-        <table class="roster-table">
+      <div style="background:#fff; padding: 1.25rem; border-radius:10px 10px 0 0; border: 1px solid #DFDDD3; border-bottom: none;">
+        <input type="text" id="table-search" placeholder="🔍 Search database rows by username identifier..." oninput="applyTierFilters()" style="width:100%; height:40px; padding:0 12px; border:1.5px solid #DFDDD3; border-radius:8px; outline:none; font-size:14px;" />
+      </div>
+
+      <div id="panel-roster" class="card" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+        <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
-            <tr>
-              <th>Student Account</th>
-              <th>Unified Academic Tracking Status</th>
-              <th style="text-align: right;">Management Actions</th>
+            <tr style="background:#F4F4F0;">
+              <th style="padding:12px;">Student Account</th>
+              <th>Division Level</th>
+              <th>Academic Track Signature</th>
+              <th style="text-align: right; padding-right:12px;">Management Actions</th>
             </tr>
           </thead>
-          <tbody id="table-body">
-            <tr>
-              <td colspan="3" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
-            </tr>
+          <tbody id="roster-tbody">
+            <tr><td colspan="4" class="loading-placeholder" style="text-align:center; padding:2rem; font-style:italic;">Syncing master system arrays...</td></tr>
           </tbody>
         </table>
       </div>
+
+      <div id="panel-behavior" class="card hidden-panel" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+        <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
+          <thead>
+            <tr style="background:#F4F4F0;">
+              <th style="padding:12px;">Student Account</th>
+              <th>Conduct Health Rating</th>
+              <th>Account State Status</th>
+              <th style="text-align: right; padding-right:12px;">Disciplinary Action</th>
+            </tr>
+          </thead>
+          <tbody id="behavior-tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="panel-academics" class="card hidden-panel" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+        <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
+          <thead>
+            <tr style="background:#F4F4F0;">
+              <th style="padding:12px;">Student Account</th>
+              <th>Live Core GPA Metric</th>
+              <th>Registered Modules</th>
+              <th style="text-align: right; padding-right:12px;">Pending Backlog Requirements</th>
+            </tr>
+          </thead>
+          <tbody id="academics-tbody"></tbody>
+        </table>
+      </div>
+
     </main>
   </div>
 
   <script>
-    // Dictionary mapping course keys to their clean presentation labels
+    let MASTER_DATA_CACHE = [];
+
     const COURSE_LABELS = {
       algebra1: "Algebra I", geometry: "Geometry", algebra2: "Algebra II", precalc: "Pre-Calculus",
       biology: "Biology", chemistry: "Chemistry", physics: "Physics", ap_stats: "AP Statistics",
@@ -89,120 +127,155 @@
       english9: "English 9", english10: "English 10", english11: "English 11", english12: "English 12"
     };
 
-    // Dictionary mapping progress/confidence keys to their readable labels
-    const STATUS_LABELS = {
-      lost: "Needs Foundation",
-      gaps: "Bridging Gaps",
-      shaky: "Polishing"
-    };
+    const STATUS_LABELS = { lost: "Needs Foundation", gaps: "Bridging Gaps", shaky: "Polishing" };
 
     document.addEventListener('DOMContentLoaded', () => {
       const sessionUser = localStorage.getItem('username');
       const sessionRole = localStorage.getItem('role');
 
       if (!sessionUser || (sessionRole !== 'Staff' && sessionRole !== 'Admin')) {
-        alert('Access Denied. Identity validation token missing.');
+        alert('Access Denied. Institutional mapping validation token missing.');
         window.location.href = '/Login/login.html';
         return;
       }
       
-      document.getElementById('faculty-title').textContent = `Faculty Control Terminal: ${sessionUser}`;
-      fetchLiveRoster();
+      document.getElementById('faculty-title').textContent = `Faculty Command Control: ${sessionUser}`;
+      fetchMasterInstitutionalRecords();
     });
 
-    async function fetchLiveRoster() {
-      const tbody = document.getElementById('table-body');
+    async function fetchMasterInstitutionalRecords() {
       try {
-        const response = await fetch('/api/students');
-        const roster = await response.json();
-        
-        tbody.innerHTML = '';
-        document.getElementById('count-students').textContent = roster.length;
-
-        if (roster.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
-          return;
-        }
-
-        roster.forEach(student => {
-          const row = document.createElement('tr');
-          row.className = "student-row";
-          
-          let courseText = "Not Started";
-          let statusText = "Pending";
-          let combinedOutput = "Not Started (Pending)";
-
-          // Safely decode the database telemetry string "courseKey|prog"
-          if (student.roadmap_track && student.roadmap_track.includes('|')) {
-            const [courseKey, progKey] = student.roadmap_track.split('|');
-            
-            if (COURSE_LABELS[courseKey]) {
-              courseText = COURSE_LABELS[courseKey];
-            }
-            if (STATUS_LABELS[progKey]) {
-              statusText = STATUS_LABELS[progKey];
-            }
-            
-            // Format to your target output style: "Course Name (Confidence Status)"
-            combinedOutput = `${courseText} (${statusText})`;
-          }
-
-          row.innerHTML = `
-            <td class="searchable-name"><strong>${student.username}</strong></td>
-            <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
-            <td style="text-align: right;">
-              <button class="btn-delete" onclick="removeStudentAccount('${student.username}')">Remove Student</button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-
+        const response = await fetch('/api/admin/roster');
+        MASTER_DATA_CACHE = await response.json();
+        document.getElementById('count-students').textContent = MASTER_DATA_CACHE.length;
+        applyTierFilters();
       } catch (err) {
-        console.error("Database table mapping exception:", err);
-        tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
+        console.error("Critical institutional synchronization failure:", err);
       }
     }
 
-    // INTERACTIVE DELETE FRONTEND INTERCEPTOR WIRE
-    async function removeStudentAccount(targetUsername) {
-      const confirmation = confirm(`Are you completely sure you want to permanently delete the profile data for "${targetUsername}"? This action cannot be undone.`);
-      if (!confirmation) return;
+    function applyTierFilters() {
+      const searchInput = document.getElementById('table-search').value.toLowerCase();
+      const divisionFilter = document.getElementById('division-filter').value;
 
-      const adminUser = localStorage.getItem('username');
+      // Filter local cache array to minimize heavy redundant network processing loops
+      const filteredData = MASTER_DATA_CACHE.filter(student => {
+        const matchesSearch = student.username.toLowerCase().includes(searchInput);
+        const matchesDivision = divisionFilter === "All" || student.school_level === divisionFilter;
+        return matchesSearch && matchesDivision;
+      });
+
+      renderRosterMatrix(filteredData);
+      renderBehaviorMatrix(filteredData);
+      renderAcademicMatrix(filteredData);
+    }
+
+    // LAYER 1 VIEW RENDERER: USER MATRIX ROSTER
+    function renderRosterMatrix(data) {
+      const tbody = document.getElementById('roster-tbody');
+      tbody.innerHTML = '';
+      if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem;">No matching student database columns found.</td></tr>`; return; }
+
+      data.forEach(student => {
+        let trackOutput = "Intake Stage Pending";
+        if (student.roadmap_track && student.roadmap_track.includes('|')) {
+          const [c, p] = student.roadmap_track.split('|');
+          trackOutput = `${COURSE_LABELS[c] || c} (${STATUS_LABELS[p] || p})`;
+        }
+
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #DFDDD3";
+        row.innerHTML = `
+          <td style="padding:14px 12px;"><strong>${student.username}</strong></td>
+          <td><span style="background:#EBF7F3; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:700;">${student.school_level}</span></td>
+          <td><code>${trackOutput}</code></td>
+          <td style="text-align: right; padding-right:12px;">
+            <button class="btn-action btn-danger" onclick="executeDatabaseDeletion('${student.username}')">Remove Student</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // LAYER 2 VIEW RENDERER: DISCIPLINARY CONDUCT TRACKING
+    function renderBehaviorMatrix(data) {
+      const tbody = document.getElementById('behavior-tbody');
+      tbody.innerHTML = '';
+      data.forEach(student => {
+        const rating = student.behavior_points || 100;
+        const color = rating > 85 ? '#168260' : rating > 70 ? '#BA7517' : '#D85A30';
+        
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #DFDDD3";
+        row.innerHTML = `
+          <td style="padding:14px 12px;"><strong>${student.username}</strong></td>
+          <td style="font-weight:700; color:${color};">${rating} / 100 Merit Score</td>
+          <td><span style="font-size:12px; font-weight:600;">Good Standing</span></td>
+          <td style="text-align: right; padding-right:12px;">
+            <button class="btn-action btn-warn" onclick="issueDemeritIncident('${student.username}')">Issue Infraction (🚨 -10)</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // LAYER 3 VIEW RENDERER: GRADES LOG MATRIX
+    function renderAcademicMatrix(data) {
+      const tbody = document.getElementById('academics-tbody');
+      tbody.innerHTML = '';
+      data.forEach(student => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #DFDDD3";
+        row.innerHTML = `
+          <td style="padding:14px 12px;"><strong>${student.username}</strong></td>
+          <td style="font-weight:700; color:var(--teal-mid);">${student.gpa || '4.00'} GPA</td>
+          <td>${student.active_courses || '4'} Classes Enrolled</td>
+          <td style="text-align: right; padding-right:12px; font-weight:700; color:${student.pending_deadlines > 2 ? '#D85A30' : 'inherit'}">${student.pending_deadlines || '0'} Deadlines Overdue</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // INTERACTIVE SUB-TAB VIEWPORT MANAGEMENT CONTROLLER
+    function toggleSubPanel(panelKey) {
+      document.querySelectorAll('.tab-trigger').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-tab-${panelKey}`).classList.add('active');
+
+      document.getElementById('panel-roster').classList.add('hidden-panel');
+      document.getElementById('panel-behavior').classList.add('hidden-panel');
+      document.getElementById('panel-academics').classList.add('hidden-panel');
+      
+      document.getElementById(`panel-${panelKey}`).classList.remove('hidden-panel');
+    }
+
+    // DATABASE CORE TRIGGER: EMIT API DEDUCTION
+    async function issueDemeritIncident(targetStudent) {
+      try {
+        const response = await fetch('/api/admin/behavior', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: targetStudent, points_deduction: 10 })
+        });
+        if (response.ok) { await fetchMasterInstitutionalRecords(); }
+      } catch (err) { console.error(err); }
+    }
+
+    // DATABASE CORE TRIGGER: REMOVE TARGET USER PERMANENTLY
+    async function executeDatabaseDeletion(targetUsername) {
+      const confirmAction = confirm(`Caution: Are you completely certain you want to erase student user "${targetUsername}" from the institutional database registry?`);
+      if (!confirmAction) return;
 
       try {
         const response = await fetch(`/api/students/${targetUsername}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminUser })
+          body: JSON.stringify({ adminUser: localStorage.getItem('username') })
         });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "Failed to remove user account.");
-        }
-
-        alert(result.message);
-        await fetchLiveRoster(); // Automatically re-draw table rows post deletion instantly
-
-      } catch (err) {
-        alert(err.message);
-      }
+        if (response.ok) { await fetchMasterInstitutionalRecords(); }
+      } catch (err) { alert("Failed to cleanly disconnect account tracking node."); }
     }
 
-    function filterRosterTable() {
-      const query = document.getElementById('table-search').value.toLowerCase();
-      document.querySelectorAll('.student-row').forEach(row => {
-        const nameText = row.querySelector('.searchable-name').textContent.toLowerCase();
-        row.style.display = nameText.includes(query) ? '' : 'none';
-      });
-    }
-
-    function handleLogout() {
-      localStorage.clear();
-      window.location.href = '/Login/login.html';
-    }
+    function handleLogout() { localStorage.clear(); window.location.href = '/Login/login.html'; }
   </script>
 </body>
 </html>

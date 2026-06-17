@@ -148,6 +148,35 @@ app.delete('/api/students/:username', async (req, res) => {
     res.status(500).json({ error: "Server database execution failure." });
   }
 });
+// FETCH COMPREHENSIVE SCHOOL ROSTER DATA
+app.get('/api/admin/roster', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT username, role, roadmap_track, gpa, active_courses, pending_deadlines,
+       COALESCE(behavior_points, 100) as behavior_points, 
+       COALESCE(school_level, 'High School') as school_level 
+       FROM users WHERE role = 'Student' ORDER BY username ASC`
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server database extraction failure." });
+  }
+});
+
+// LOG A BEHAVIOR INCIDENT OR DEMERIT
+app.post('/api/admin/behavior', async (req, res) => {
+  try {
+    const { username, points_deduction } = req.body;
+    await pool.query(
+      "UPDATE users SET behavior_points = COALESCE(behavior_points, 100) - $1 WHERE username = $2",
+      [points_deduction, username]
+    );
+    res.status(200).json({ message: "Disciplinary telemetry logged successfully." });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update database behavior records." });
+  }
+});
 // 5. Start the engine
 app.listen(port, () => {
   console.log(`🚀 Cornerstone AI server is alive in the cloud on port ${port}`);
