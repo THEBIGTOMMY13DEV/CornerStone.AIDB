@@ -7,9 +7,61 @@
   <link rel="stylesheet" href="./student-style.css">
   <link rel="stylesheet" href="./RoadMap/roadmapstyle.css">
   <style>
-    /* Prevent the roadmap styles from breaking the side-by-side app layout */
     body { display: block; overflow: auto; }
     .hidden { display: none !important; }
+    
+    /* Quiz Specific Interface Elements */
+    .quiz-card {
+      background: var(--white, #FFFFFF);
+      border-radius: 16px;
+      border: 1px solid var(--stone-border, #E5E3D8);
+      padding: 2.5rem;
+      max-width: 680px;
+      margin: 2rem auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      animation: quizFadeIn 0.4s ease forwards;
+    }
+    .quiz-options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 2rem 0;
+    }
+    .quiz-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 1.5px solid var(--stone-border, #E5E3D8);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quiz-row:hover {
+      background-color: var(--stone-light, #F8F7F2);
+      border-color: var(--stone-mid, #6B6A63);
+    }
+    .quiz-row input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--stone, #1A1A18);
+    }
+    .quiz-label-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .quiz-progress-indicator {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--stone-mid, #6B6A63);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    @keyframes quizFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -32,19 +84,31 @@
         <div class="user-avatar" id="user-display">S</div>
       </header>
 
-      <div id="view-dashboard">
+      <div id="quiz-view" class="quiz-card hidden">
+        <div class="quiz-progress-indicator" id="quiz-step-tracker">Question 1 of 4</div>
+        <h2 id="question-text" style="font-size: 20px; margin-bottom: 0.5rem; font-family: var(--sans);">Loading query baseline...</h2>
+        <p class="subtitle" id="question-desc">Select the response that best aligns with your current academic standing.</p>
+        
+        <div class="quiz-options-group" id="options-box"></div>
+        
+        <button class="cta" style="background: var(--stone, #1A1A18); color: white; width: auto; padding: 12px 28px;" onclick="processQuizAnswer()">
+          Submit Answer & Continue →
+        </button>
+      </div>
+
+      <div id="view-dashboard" class="hidden">
         <section class="metrics-grid">
           <div class="metric-card">
             <div class="m-label">Current GPA</div>
-            <div class="m-value">3.85</div>
+            <div class="m-value" id="stat-gpa">--</div>
           </div>
           <div class="metric-card">
             <div class="m-label">Active Courses</div>
-            <div class="m-value">4</div>
+            <div class="m-value" id="stat-courses">--</div>
           </div>
           <div class="metric-card">
             <div class="m-label">Pending Deadlines</div>
-            <div class="m-value" style="color: var(--coral-mid);">2</div>
+            <div class="m-value" style="color: #D85A30;" id="stat-tasks">--</div>
           </div>
         </section>
 
@@ -57,7 +121,7 @@
                   <div class="c-title">Core Learning Semester Track</div>
                   <div class="c-teacher">Status: Active Account Enrolment</div>
                 </div>
-                <span class="grade-badge">A-</span>
+                <span class="grade-badge" id="badge-gpa-letter">A</span>
               </div>
             </div>
           </div>
@@ -66,8 +130,8 @@
             <div class="task-list">
               <div class="task-item">
                 <div>
-                  <div class="t-name">Roadmap System Live</div>
-                  <div class="t-due">Click "My Roadmap" in the sidebar to review your milestone checkpoints!</div>
+                  <div class="t-name">Diagnostic Metrics Loaded</div>
+                  <div class="t-due">Your analytical parameters have been written down inside our cloud database infrastructure.</div>
                 </div>
               </div>
             </div>
@@ -76,10 +140,9 @@
       </div>
 
       <div id="view-roadmap" style="display: none;">
-        
         <div id="s-diag" class="screen active" style="background: white; border-radius: 16px; border: 1px solid var(--stone-border); padding: 2rem;">
           <div style="margin-bottom: 2rem;">
-            <h2 font-family="var(--serif);">Personalized Academic Recovery</h2>
+            <h2>Personalized Academic Recovery</h2>
             <p class="subtitle">Rebuild foundations, close specific learning gaps, and master what's next.</p>
           </div>
           
@@ -138,49 +201,156 @@
         </div>
 
         <div id="s-roadmap" class="screen" style="background: white; border-radius: 16px; border: 1px solid var(--stone-border);">
-          <div class="roadmap-header">
+          <div class="roadmap-header" style="padding:2rem; border-bottom:1px solid #E5E3D8;">
             <button class="back-btn" onclick="goBack()">← Edit Details</button>
-            <div class="student-banner">
+            <div class="student-banner" style="margin-top:1rem; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <div class="student-name" id="r-name" style="font-size: 24px; font-weight: 700;"></div>
-                <div class="student-meta" id="r-meta"></div>
+                <div class="student-meta" id="r-meta" style="color:#6B6A63;"></div>
               </div>
               <span class="badge" id="r-badge"></span>
             </div>
-            <div class="progress-bar-wrap">
-              <div class="pb-label"><span>Recovery Progress</span><strong id="pb-pct">0%</strong></div>
-              <div class="pb-track"><div class="pb-fill" id="pb-fill"></div></div>
+            <div class="progress-bar-wrap" style="margin-top:1.5rem;">
+              <div class="pb-label" style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span style="font-size:12px; font-weight:700;">Recovery Progress</span><strong id="pb-pct">0%</strong></div>
+              <div class="pb-track" style="height:8px; background:#E5E3D8; border-radius:4px; overflow:hidden;"><div class="pb-fill" id="pb-fill" style="height:100%; background:#1D9E75; width:0%; transition:width 0.4s ease;"></div></div>
             </div>
           </div>
 
-          <div class="roadmap-content">
+          <div class="roadmap-content" style="padding:2rem;">
             <div class="roadmap-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
               <div class="roadmap-col">
-                <div class="section-header"><span>Priority Gaps</span><div class="section-line"></div></div>
+                <div class="section-header" style="font-weight:700; margin-bottom:1rem; border-bottom:2px solid #E5E3D8; padding-bottom:0.5rem;">Priority Gaps</div>
                 <div class="milestone-list" id="gaps-list"></div>
               </div>
               <div class="roadmap-col">
-                <div class="section-header"><span>Upcoming Units</span><div class="section-line"></div></div>
+                <div class="section-header" style="font-weight:700; margin-bottom:1rem; border-bottom:2px solid #E5E3D8; padding-bottom:0.5rem;">Upcoming Units</div>
                 <div class="milestone-list" id="next-list"></div>
               </div>
             </div>
-            <div class="tip-box" id="tip-box" style="margin-top: 1.5rem;">
+            <div class="tip-box" style="margin-top: 2rem; background:#F8F7F2; padding:1.5rem; border-radius:8px; border:1px solid #E5E3D8;">
               <div id="tip-text">Hover over a lesson block to pull study advice context data blocks.</div>
             </div>
           </div>
         </div>
-
       </div>
     </main>
   </div>
 
   <script src="./RoadMap/roadmapscript.js"></script>
   <script>
-    // Handles sidebar view changes between LMS Dashboard and Roadmap tabs smoothly
-    function switchTab(viewTarget) {
-      document.querySelectorAll('.lms-nav a').forEach(a => a.classList.remove('active'));
+    const sessionUser = localStorage.getItem('username');
+
+    // The Complex Evaluation Quiz Matrix Structure
+    const DIAG_QUIZ = [
+      { q: "What is your typical historical test grade performance?", d: "Helps approximate baseline GPA distributions.", choices: [{t: "Mostly A range scores", v: 3.9}, {t: "B to C range tracking", v: 2.9}, {t: "Struggling to maintain passing scores", v: 1.8}] },
+      { q: "How many active subjects are you currently taking?", d: "Maps total resource allocation demands.", choices: [{t: "4 standard courses", v: 4}, {t: "5 courses", v: 5}, {t: "6 or more intensive blocks", v: 6}] },
+      { q: "What is the volume of your current outstanding homework backlog?", d: "Evaluates pending system milestone bottlenecks.", choices: [{t: "Completely caught up", v: 0}, {t: "1 to 2 loose assignments outstanding", v: 2}, {t: "3 or more major backed up deadlines", v: 4}] },
+      { q: "How much time do you allocate daily to targeted study revision?", d: "Refines fraction parameters to generate a realistic GPA.", choices: [{t: "Over 2 hours daily", v: 0.08}, {t: "1 hour daily", v: 0.04}, {t: "Inconsistent study habits", v: 0.00}] }
+    ];
+
+    let quizIndex = 0;
+    let quizAccumulator = { baseGpa: 0.0, courses: 4, tasks: 0, bonus: 0.0 };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!sessionUser) { window.location.href = '/Login/'; return; }
       
-      if (viewTarget === 'dashboard') {
+      document.getElementById('welcome-title').textContent = `Welcome Back, ${sessionUser}`;
+      document.getElementById('user-display').textContent = sessionUser.charAt(0).toUpperCase();
+      document.getElementById('inp-name').value = sessionUser;
+
+      await evaluateTelemetryState();
+    });
+
+    async function evaluateTelemetryState() {
+      try {
+        const response = await fetch('/api/students');
+        const roster = await response.json();
+        const profile = roster.find(s => s.username === sessionUser);
+
+        // If stats exist and are above default zero values, load directly into dashboard view
+        if (profile && (parseFloat(profile.gpa) > 0 || profile.pending_deadlines > 0)) {
+          hydrateDashboardLayout(profile.gpa, profile.active_courses, profile.pending_deadlines);
+        } else {
+          // New student -> Force diagnostic quiz view
+          document.getElementById('view-dashboard').classList.add('hidden');
+          document.getElementById('quiz-view').classList.remove('hidden');
+          renderQuizQuestion();
+        }
+      } catch (err) {
+        console.error("Database tracking link exception: ", err);
+      }
+    }
+
+    function renderQuizQuestion() {
+      const activeNode = DIAG_QUIZ[quizIndex];
+      document.getElementById('quiz-step-tracker').textContent = `Question ${quizIndex + 1} of ${DIAG_QUIZ.length}`;
+      document.getElementById('question-text').textContent = activeNode.q;
+      document.getElementById('question-desc').textContent = activeNode.d;
+
+      const box = document.getElementById('options-box');
+      box.innerHTML = '';
+      activeNode.choices.forEach((opt, index) => {
+        box.innerHTML += `
+          <label class="quiz-row">
+            <input type="radio" name="quiz-input-node" value="${opt.v}" ${index === 0 ? 'checked' : ''}>
+            <span class="quiz-label-text">${opt.t}</span>
+          </label>`;
+      });
+    }
+
+    async function processQuizAnswer() {
+      const choiceValue = parseFloat(document.querySelector('input[name="quiz-input-node"]:checked').value);
+
+      if (quizIndex === 0) quizAccumulator.baseGpa = choiceValue;
+      if (quizIndex === 1) quizAccumulator.courses = choiceValue;
+      if (quizIndex === 2) quizAccumulator.tasks = choiceValue;
+      if (quizIndex === 3) quizAccumulator.bonus = choiceValue;
+
+      quizIndex++;
+      if (quizIndex < DIAG_QUIZ.length) {
+        renderQuizQuestion();
+      } else {
+        // Quiz completed -> calculate and transmit metrics to Postgres via server
+        const aggregateGpa = (quizAccumulator.baseGpa + quizAccumulator.bonus).toFixed(2);
+        await transmitQuizMetrics(aggregateGpa, quizAccumulator.courses, quizAccumulator.tasks);
+      }
+    }
+
+    async function transmitQuizMetrics(gpa, courses, tasks) {
+      try {
+        const response = await fetch('/api/update-stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: sessionUser, gpa, active_courses: courses, pending_deadlines: tasks })
+        });
+
+        if (response.ok) {
+          document.getElementById('quiz-view').classList.add('hidden');
+          hydrateDashboardLayout(gpa, courses, tasks);
+        }
+      } catch (err) {
+        console.error("Telemetry pipeline execution error: ", err);
+      }
+    }
+
+    function hydrateDashboardLayout(gpa, courses, tasks) {
+      document.getElementById('stat-gpa').textContent = parseFloat(gpa).toFixed(2);
+      document.getElementById('stat-courses').textContent = courses;
+      document.getElementById('stat-tasks').textContent = tasks;
+
+      // Handle custom grade badge assignment letter tracking
+      const numericGpa = parseFloat(gpa);
+      let letter = "A";
+      if (numericGpa < 3.5) letter = "B";
+      if (numericGpa < 2.5) letter = "C";
+      document.getElementById('badge-gpa-letter').textContent = letter;
+
+      document.getElementById('view-dashboard').classList.remove('hidden');
+    }
+
+    function switchTab(target) {
+      document.querySelectorAll('.lms-nav a').forEach(a => a.classList.remove('active'));
+      if (target === 'dashboard') {
         document.getElementById('nav-dash').classList.add('active');
         document.getElementById('view-dashboard').style.display = 'block';
         document.getElementById('view-roadmap').style.display = 'none';
@@ -191,19 +361,7 @@
       }
     }
 
-    // Profile initialization hooks upon structural loading completed loops
-    document.addEventListener('DOMContentLoaded', () => {
-      const currentLoggedInUser = localStorage.getItem('username') || 'Student';
-      document.getElementById('welcome-title').textContent = `Welcome Back, ${currentLoggedInUser}`;
-      document.getElementById('user-display').textContent = currentLoggedInUser.charAt(0).toUpperCase();
-      document.getElementById('inp-name').value = currentLoggedInUser;
-      validateForm();
-    });
-
-    function handleLogout() {
-      localStorage.clear();
-      window.location.href = '/Login/login.html';
-    }
+    function handleLogout() { localStorage.clear(); window.location.href = '/Login/login.html'; }
   </script>
 </body>
 </html>
