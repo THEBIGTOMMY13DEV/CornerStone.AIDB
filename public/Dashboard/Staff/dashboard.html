@@ -82,9 +82,9 @@
       const sessionUser = localStorage.getItem('username');
       const sessionRole = localStorage.getItem('role');
 
-      if (!sessionUser || sessionRole !== 'Staff') {
+      if (!sessionUser || sessionRole !== 'Staff' && sessionRole !== 'Admin') {
         alert('Access Denied. Identity validation token missing.');
-        window.location.href = '/Login/';
+        window.location.href = '/Login/login.html';
         return;
       }
       
