@@ -77,7 +77,7 @@ async function handleLogin() {
         // Role-based routing redirection
         setTimeout(() => {
             if (data.role === 'Staff') {
-                window.location.href = '/Dashboard/staff.html'; // Points to your staff subfolder path
+                window.location.href = '/Dashboard/Staff/dashboard.html'; // Points to your staff subfolder path
             } else {
                 window.location.href = '/RoadMap/roadmap.html'; // Points directly to your Roadmap subfolder file
             }
