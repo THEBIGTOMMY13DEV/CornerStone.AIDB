@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cornerstone LMS | Administration Panel</title>
   <link rel="stylesheet" href="./staff-style.css">
 </head>
-
 <body>
   <div class="lms-wrapper">
     <aside class="lms-sidebar">
@@ -41,25 +39,22 @@
         <div class="table-header">
           <div>
             <h3>Registered Student Roadmaps</h3>
-            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..."
-              oninput="filterRosterTable()"
-              style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
+            <input type="text" id="table-search" placeholder="🔍 Filter rows by username..." oninput="filterRosterTable()" style="margin-top: 10px; height: 36px; padding: 0 12px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-size: 13px; max-width: 250px; outline: none;" />
           </div>
           <button class="refresh-btn" onclick="fetchLiveRoster()">🔄 Refresh Roster</button>
         </div>
-
+        
         <table class="roster-table">
           <thead>
             <tr>
               <th>Student Account</th>
-              <th>Selected Course</th>
-              <th>Confidence Status</th>
+              <th>Unified Academic Tracking Status</th>
               <th>Raw Telemetry String</th>
             </tr>
           </thead>
           <tbody id="table-body">
             <tr>
-              <td colspan="4" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
+              <td colspan="3" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
             </tr>
           </tbody>
         </table>
@@ -68,7 +63,7 @@
   </div>
 
   <script>
-    // Translation dictionary to map code keys to pretty display text
+    // 1. Dictionary mapping course keys to their clean presentation labels
     const COURSE_LABELS = {
       algebra1: "Algebra I", geometry: "Geometry", algebra2: "Algebra II", precalc: "Pre-Calculus",
       biology: "Biology", chemistry: "Chemistry", physics: "Physics", ap_stats: "AP Statistics",
@@ -76,10 +71,11 @@
       english9: "English 9", english10: "English 10", english11: "English 11", english12: "English 12"
     };
 
+    // 2. Dictionary mapping progress/confidence keys to their readable labels
     const STATUS_LABELS = {
-      lost: { text: "Needs Foundation", class: "badge-coral" },
-      gaps: { text: "Bridging Gaps", class: "badge-amber" },
-      shaky: { text: "Polishing Topics", class: "badge-teal" }
+      lost: "Needs Foundation",
+      gaps: "Bridging Gaps",
+      shaky: "Polishing"
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -88,10 +84,10 @@
 
       if (!sessionUser || sessionRole !== 'Staff' && sessionRole !== 'Admin') {
         alert('Access Denied. Identity validation token missing.');
-        window.location.href = '/Login/login.html';
+        window.location.href = '/Login/Login.html';
         return;
       }
-
+      
       document.getElementById('faculty-title').textContent = `Faculty Control Terminal: ${sessionUser}`;
       fetchLiveRoster();
     });
@@ -101,51 +97,49 @@
       try {
         const response = await fetch('/api/students');
         const roster = await response.json();
-
+        
         tbody.innerHTML = '';
         document.getElementById('count-students').textContent = roster.length;
 
         if (roster.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
           return;
         }
 
         roster.forEach(student => {
           const row = document.createElement('tr');
           row.className = "student-row";
-
+          
           let courseText = "Not Started";
           let statusText = "Pending";
           let combinedOutput = "Not Started (Pending)";
 
-          // Safely decode the database telemetry string "courseKey|progKey"
+          // Safely decode the database telemetry string "courseKey|prog"
           if (student.roadmap_track && student.roadmap_track.includes('|')) {
             const [courseKey, progKey] = student.roadmap_track.split('|');
-
-            // 1. Look up the pretty names from your dictionaries
+            
             if (COURSE_LABELS[courseKey]) {
               courseText = COURSE_LABELS[courseKey];
             }
             if (STATUS_LABELS[progKey]) {
-              statusText = STATUS_LABELS[progKey].text;
+              statusText = STATUS_LABELS[progKey];
             }
-
-            // 2. Combine them into your exact requested format
+            
+            // Format to your target output style: "Course Name (Confidence Status)"
             combinedOutput = `${courseText} (${statusText})`;
           }
 
-          // Render the unified string cleanly into a single table cell
           row.innerHTML = `
-    <td class="searchable-name"><strong>${student.username}</strong></td>
-    <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
-    <td><code>${student.roadmap_track || 'empty'}</code></td>
-  `;
+            <td class="searchable-name"><strong>${student.username}</strong></td>
+            <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
+            <td><code>${student.roadmap_track || 'empty'}</code></td>
+          `;
           tbody.appendChild(row);
         });
 
       } catch (err) {
         console.error("Database table mapping exception:", err);
-        tbody.innerHTML = `<tr><td colspan="4" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
       }
     }
 
@@ -159,9 +153,8 @@
 
     function handleLogout() {
       localStorage.clear();
-      window.location.href = '/Login/login.html';
+      window.location.href = '/Login/Login.html';
     }
   </script>
 </body>
-
 </html>
