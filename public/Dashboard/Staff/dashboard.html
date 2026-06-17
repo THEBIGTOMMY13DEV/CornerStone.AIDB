@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,25 +8,90 @@
   <link rel="stylesheet" href="./staff-style.css">
   <style>
     /* Framework Tab & Utility Extensions */
-    .admin-grid-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
-    .sub-tabs { display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 2px solid var(--stone-border); padding-bottom: 10px; }
-    .tab-trigger { background: none; border: none; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--stone-mid); padding: 8px 16px; cursor: pointer; border-radius: 6px; }
-    .tab-trigger.active { background: var(--stone); color: var(--white); }
-    .hidden-panel { display: none !important; }
-    
-    .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-    .btn-danger { background: #FFF5F2; border-color: #D85A30; color: #D85A30; }
-    .btn-danger:hover { background: #D85A30; color: white; }
-    .btn-warn { background: #FFF9ED; border-color: #BA7517; color: #BA7517; }
-    .btn-warn:hover { background: #BA7517; color: white; }
-    
-    .filter-select { height: 36px; padding: 0 10px; border: 1.5px solid var(--stone-border); border-radius: 8px; font-family: var(--sans); font-size: 13px; outline: none; }
+    .admin-grid-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .sub-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--stone-border);
+      padding-bottom: 10px;
+    }
+
+    .tab-trigger {
+      background: none;
+      border: none;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--stone-mid);
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .tab-trigger.active {
+      background: var(--stone);
+      color: var(--white);
+    }
+
+    .hidden-panel {
+      display: none !important;
+    }
+
+    .btn-action {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: 0.2s;
+    }
+
+    .btn-danger {
+      background: #FFF5F2;
+      border-color: #D85A30;
+      color: #D85A30;
+    }
+
+    .btn-danger:hover {
+      background: #D85A30;
+      color: white;
+    }
+
+    .btn-warn {
+      background: #FFF9ED;
+      border-color: #BA7517;
+      color: #BA7517;
+    }
+
+    .btn-warn:hover {
+      background: #BA7517;
+      color: white;
+    }
+
+    .filter-select {
+      height: 36px;
+      padding: 0 10px;
+      border: 1.5px solid var(--stone-border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 13px;
+      outline: none;
+    }
   </style>
 </head>
+
 <body>
   <div class="admin-grid-layout">
     <aside class="lms-sidebar" style="background: #111; color: #fff; padding: 2rem 1.5rem;">
-      <div class="lms-logo" style="font-size: 18px; font-weight:700; margin-bottom: 2.5rem; letter-spacing:0.05em;">CORNERSTONE ADMIN</div>
+      <div class="lms-logo" style="font-size: 18px; font-weight:700; margin-bottom: 2.5rem; letter-spacing:0.05em;">
+        CORNERSTONE ADMIN</div>
       <nav class="lms-nav" style="display:flex; flex-direction:column; gap:10px;">
         <a href="#" class="active">🏫 Campus Management</a>
       </nav>
@@ -41,12 +107,16 @@
       </header>
 
       <div class="sub-tabs">
-        <button class="tab-trigger active" id="btn-tab-roster" onclick="toggleSubPanel('roster')">👥 Student Roster Matrix</button>
-        <button class="tab-trigger" id="btn-tab-behavior" onclick="toggleSubPanel('behavior')">🛡️ Behavior & Conduct Registry</button>
-        <button class="tab-trigger" id="btn-tab-academics" onclick="toggleSubPanel('academics')">📊 Academic Grading Analytics</button>
+        <button class="tab-trigger active" id="btn-tab-roster" onclick="toggleSubPanel('roster')">👥 Student Roster
+          Matrix</button>
+        <button class="tab-trigger" id="btn-tab-behavior" onclick="toggleSubPanel('behavior')">🛡️ Behavior & Conduct
+          Registry</button>
+        <button class="tab-trigger" id="btn-tab-academics" onclick="toggleSubPanel('academics')">📊 Academic Grading
+          Analytics</button>
       </div>
 
-      <section class="metrics-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-bottom: 2rem;">
+      <section class="metrics-grid"
+        style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-bottom: 2rem;">
         <div class="metric-card" style="background:#fff; padding:1.5rem; border:1px solid #DFDDD3; border-radius:10px;">
           <div class="m-label" style="font-size:11px; color:#5A5A55; font-weight:700;">TOTAL CAMPUS ENROLMENTS</div>
           <div class="m-value" id="count-students" style="font-size:28px; font-weight:700; margin-top:5px;">--</div>
@@ -57,7 +127,8 @@
         </div>
         <div class="metric-card" style="background:#fff; padding:1.5rem; border:1px solid #DFDDD3; border-radius:10px;">
           <div class="m-label" style="font-size:11px; color:#5A5A55; font-weight:700;">CAMPUS DIVISION LEVEL</div>
-          <select id="division-filter" class="filter-select" style="margin-top:8px; width:100%;" onchange="applyTierFilters()">
+          <select id="division-filter" class="filter-select" style="margin-top:8px; width:100%;"
+            onchange="applyTierFilters()">
             <option value="All">All Divisions (K-12 Network)</option>
             <option value="High School">High School Tier</option>
             <option value="Middle School">Middle School Tier</option>
@@ -66,11 +137,15 @@
         </div>
       </section>
 
-      <div style="background:#fff; padding: 1.25rem; border-radius:10px 10px 0 0; border: 1px solid #DFDDD3; border-bottom: none;">
-        <input type="text" id="table-search" placeholder="🔍 Search database rows by username identifier..." oninput="applyTierFilters()" style="width:100%; height:40px; padding:0 12px; border:1.5px solid #DFDDD3; border-radius:8px; outline:none; font-size:14px;" />
+      <div
+        style="background:#fff; padding: 1.25rem; border-radius:10px 10px 0 0; border: 1px solid #DFDDD3; border-bottom: none;">
+        <input type="text" id="table-search" placeholder="🔍 Search database rows by username identifier..."
+          oninput="applyTierFilters()"
+          style="width:100%; height:40px; padding:0 12px; border:1.5px solid #DFDDD3; border-radius:8px; outline:none; font-size:14px;" />
       </div>
 
-      <div id="panel-roster" class="card" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+      <div id="panel-roster" class="card"
+        style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
         <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
             <tr style="background:#F4F4F0;">
@@ -81,12 +156,16 @@
             </tr>
           </thead>
           <tbody id="roster-tbody">
-            <tr><td colspan="4" class="loading-placeholder" style="text-align:center; padding:2rem; font-style:italic;">Syncing master system arrays...</td></tr>
+            <tr>
+              <td colspan="4" class="loading-placeholder" style="text-align:center; padding:2rem; font-style:italic;">
+                Syncing master system arrays...</td>
+            </tr>
           </tbody>
         </table>
       </div>
 
-      <div id="panel-behavior" class="card hidden-panel" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+      <div id="panel-behavior" class="card hidden-panel"
+        style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
         <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
             <tr style="background:#F4F4F0;">
@@ -100,7 +179,8 @@
         </table>
       </div>
 
-      <div id="panel-academics" class="card hidden-panel" style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
+      <div id="panel-academics" class="card hidden-panel"
+        style="background:#fff; border:1px solid #DFDDD3; border-radius:0 0 10px 10px; padding:2rem; overflow:hidden;">
         <table class="roster-table" style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
             <tr style="background:#F4F4F0;">
@@ -138,7 +218,7 @@
         window.location.href = '/Login/login.html';
         return;
       }
-      
+
       document.getElementById('faculty-title').textContent = `Faculty Command Control: ${sessionUser}`;
       fetchMasterInstitutionalRecords();
     });
@@ -204,7 +284,7 @@
       data.forEach(student => {
         const rating = student.behavior_points || 100;
         const color = rating > 85 ? '#168260' : rating > 70 ? '#BA7517' : '#D85A30';
-        
+
         const row = document.createElement('tr');
         row.style.borderBottom = "1px solid #DFDDD3";
         row.innerHTML = `
@@ -220,18 +300,22 @@
     }
 
     // LAYER 3 VIEW RENDERER: GRADES LOG MATRIX
+    // LAYER 3 VIEW RENDERER: UPDATED FOR LIVE DATABASE VALUES
     function renderAcademicMatrix(data) {
       const tbody = document.getElementById('academics-tbody');
       tbody.innerHTML = '';
+
       data.forEach(student => {
         const row = document.createElement('tr');
         row.style.borderBottom = "1px solid #DFDDD3";
         row.innerHTML = `
-          <td style="padding:14px 12px;"><strong>${student.username}</strong></td>
-          <td style="font-weight:700; color:var(--teal-mid);">${student.gpa || '4.00'} GPA</td>
-          <td>${student.active_courses || '4'} Classes Enrolled</td>
-          <td style="text-align: right; padding-right:12px; font-weight:700; color:${student.pending_deadlines > 2 ? '#D85A30' : 'inherit'}">${student.pending_deadlines || '0'} Deadlines Overdue</td>
-        `;
+      <td style="padding:14px 12px;"><strong>${student.username}</strong></td>
+      <td style="font-weight:700; color:#168260;">${parseFloat(student.gpa || 4.00).toFixed(2)} GPA</td>
+      <td>${student.active_courses || 4} Classes Enrolled</td>
+      <td style="text-align: right; padding-right:12px; font-weight:700; color:${parseInt(student.pending_deadlines) > 2 ? '#D85A30' : 'inherit'}">
+        ${student.pending_deadlines || 0} Deadlines Overdue
+      </td>
+    `;
         tbody.appendChild(row);
       });
     }
@@ -244,7 +328,7 @@
       document.getElementById('panel-roster').classList.add('hidden-panel');
       document.getElementById('panel-behavior').classList.add('hidden-panel');
       document.getElementById('panel-academics').classList.add('hidden-panel');
-      
+
       document.getElementById(`panel-${panelKey}`).classList.remove('hidden-panel');
     }
 
@@ -278,4 +362,5 @@
     function handleLogout() { localStorage.clear(); window.location.href = '/Login/login.html'; }
   </script>
 </body>
+
 </html>
