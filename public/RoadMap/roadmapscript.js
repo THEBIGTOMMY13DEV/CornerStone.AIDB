@@ -474,8 +474,6 @@ const CURRICULUM = {
   }
 };
 
-// ... (Your massive CURRICULUM object is up here unchanged) ...
-
 let currentDefaultTip = "";
 
 function updateCourseOptions() {
@@ -520,6 +518,68 @@ function updateTipText(html) {
   void tipEl.offsetWidth;
   tipEl.innerHTML = html;
   tipEl.classList.add('tip-animate');
+}
+
+// 🚀 RETAINED LOGIC WITH DB AUTO-SAVE ADDED
+function generateRoadmap() {
+  const name = document.getElementById('inp-name').value.trim();
+  const grade = document.getElementById('inp-grade').value;
+  const courseKey = document.getElementById('inp-course').value;
+  const progInput = document.querySelector('input[name="prog"]:checked');
+  const prog = progInput ? progInput.value : null;
+  
+  // Create your database string representation
+  const structuredTrackSignature = `${courseKey}|${prog}`;
+
+  // Execute your exact original UI render logic
+  buildRoadmapUI(name, grade, courseKey, prog);
+
+  // DB WIRE: Save this data directly to Neon via server route
+  const currentLoggedInUser = localStorage.getItem('username') || name; 
+
+  fetch('/save-track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: currentLoggedInUser,
+      track: structuredTrackSignature
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log('🔄 Cloud Sync Completed:', data.message))
+  .catch(err => console.error('❌ Cloud Sync failed, relying on client runtime:', err));
+}
+
+// Extracted UI Builder to isolate rendering for initial submission and db loading
+function buildRoadmapUI(name, grade, courseKey, prog) {
+  const data = CURRICULUM[courseKey];
+  if (!data) return;
+
+  document.getElementById('r-name').textContent = name;
+  document.getElementById('r-meta').textContent = `${grade}th Grade · ${data.label}`;
+
+  const badgeEl = document.getElementById('r-badge');
+  const badges = {
+    lost: ['Needs Foundation','badge-coral'],
+    gaps: ['Bridging Gaps','badge-amber'],
+    shaky: ['Polishing','badge-teal']
+  };
+  badgeEl.textContent = badges[prog][0];
+  badgeEl.className = 'badge ' + badges[prog][1];
+
+  const milestones = data[prog];
+  const gaps = milestones.filter(m => m.phase === 'gap');
+  const nexts = milestones.filter(m => m.phase === 'next');
+
+  renderList(gaps, 'gaps-list');
+  renderList(nexts, 'next-list');
+  
+  currentDefaultTip = `<strong>Study Strategy:</strong> ${data.tip[prog] || "Focus on consistent daily review."}`;
+  updateTipText(currentDefaultTip);
+  updateProgress();
+
+  document.getElementById('s-diag').classList.remove('active');
+  document.getElementById('s-roadmap').classList.add('active');
 }
 
 function renderList(items, containerId) {
@@ -573,92 +633,41 @@ function goBack() {
 document.getElementById('inp-name').oninput = validateForm;
 
 
-// ==================== FULL-STACK BACKEND WIRES ====================
-
-function generateRoadmap() {
-  const name = document.getElementById('inp-name').value.trim();
-  const grade = document.getElementById('inp-grade').value;
-  const courseKey = document.getElementById('inp-course').value;
-  const progInput = document.querySelector('input[name="prog"]:checked');
-  const prog = progInput ? progInput.value : null;
-  
-  const structuredTrackSignature = `${courseKey}|${prog}`;
-
-  buildRoadmapUI(name, grade, courseKey, prog);
-
-  const currentLoggedInUser = localStorage.getItem('username') || name; 
-
-  fetch('/save-track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: currentLoggedInUser,
-      track: structuredTrackSignature
-    })
-  })
-  .then(res => res.json())
-  .then(data => console.log('🔄 Cloud Sync Completed:', data.message))
-  .catch(err => console.error('❌ Cloud Sync failed, relying on client runtime:', err));
-}
-
-function buildRoadmapUI(name, grade, courseKey, prog) {
-  const data = CURRICULUM[courseKey];
-  if (!data) return;
-
-  document.getElementById('r-name').textContent = name;
-  document.getElementById('r-meta').textContent = `${grade}th Grade · ${data.label}`;
-
-  const badgeEl = document.getElementById('r-badge');
-  const badges = {
-    lost: ['Needs Foundation', 'badge-coral'],
-    gaps: ['Bridging Gaps', 'badge-amber'],
-    shaky: ['Polishing', 'badge-teal']
-  };
-  badgeEl.textContent = badges[prog][0];
-  badgeEl.className = 'badge ' + badges[prog][1];
-
-  const milestones = data[prog];
-  const gaps = milestones.filter(m => m.phase === 'gap');
-  const nexts = milestones.filter(m => m.phase === 'next');
-
-  renderList(gaps, 'gaps-list');
-  renderList(nexts, 'next-list');
-  
-  currentDefaultTip = `<strong>Study Strategy:</strong> ${data.tip[prog] || "Focus on consistent daily review."}`;
-  updateTipText(currentDefaultTip);
-  updateProgress();
-
-  document.getElementById('s-diag').classList.remove('active');
-  document.getElementById('s-roadmap').classList.add('active');
-}
+// ==================== NEON CLOUD HYDRATION HUB ====================
 
 async function checkExistingUserRoadmap() {
   const activeUser = localStorage.getItem('username');
   if (!activeUser) return; 
 
   try {
+    // Call server to fetch the roster arrays
     const response = await fetch('/api/students');
     const roster = await response.json();
     
+    // Find the current logged in student
     const userProfile = roster.find(student => student.username === activeUser);
     
+    // If they have a track signature string stored in PostgreSQL, split and render it immediately
     if (userProfile && userProfile.roadmap_track) {
       const [savedCourse, savedProg] = userProfile.roadmap_track.split('|');
       
       if (CURRICULUM[savedCourse]) {
         console.log(`🎯 Found existing ecosystem roadmap for ${activeUser}. Hydrating cloud data...`);
         
+        // Deduce general grade brackets based on course selections
         let parsedGrade = "9";
         if (["geometry", "chemistry", "us_hist", "english10"].includes(savedCourse)) parsedGrade = "10";
         if (["algebra2", "physics", "usgov", "english11"].includes(savedCourse)) parsedGrade = "11";
         if (["precalc", "ap_stats", "econ", "english12"].includes(savedCourse)) parsedGrade = "12";
 
+        // Draw the UI panels instantly bypassing the setup form screen
         buildRoadmapUI(activeUser, parsedGrade, savedCourse, savedProg);
       }
     }
   } catch (error) {
-    console.warn("Could not auto-hydrate roadmap view from cloud server network context.", error);
+    console.warn("Could not auto-hydrate roadmap view from database context.", error);
   }
 }
 
+// Handle real-time database reading on page initialization
 window.addEventListener('DOMContentLoaded', checkExistingUserRoadmap);
