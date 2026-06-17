@@ -49,12 +49,11 @@
             <tr>
               <th>Student Account</th>
               <th>Unified Academic Tracking Status</th>
-              <th>Raw Telemetry String</th>
             </tr>
           </thead>
           <tbody id="table-body">
             <tr>
-              <td colspan="3" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
+              <td colspan="2" class="loading-placeholder">Pinging secure database cluster telemetry streams...</td>
             </tr>
           </tbody>
         </table>
@@ -63,7 +62,7 @@
   </div>
 
   <script>
-    // 1. Dictionary mapping course keys to their clean presentation labels
+    // Dictionary mapping course keys to their clean presentation labels
     const COURSE_LABELS = {
       algebra1: "Algebra I", geometry: "Geometry", algebra2: "Algebra II", precalc: "Pre-Calculus",
       biology: "Biology", chemistry: "Chemistry", physics: "Physics", ap_stats: "AP Statistics",
@@ -71,7 +70,7 @@
       english9: "English 9", english10: "English 10", english11: "English 11", english12: "English 12"
     };
 
-    // 2. Dictionary mapping progress/confidence keys to their readable labels
+    // Dictionary mapping progress/confidence keys to their readable labels
     const STATUS_LABELS = {
       lost: "Needs Foundation",
       gaps: "Bridging Gaps",
@@ -102,7 +101,7 @@
         document.getElementById('count-students').textContent = roster.length;
 
         if (roster.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="2" class="loading-placeholder">No students registered in the database yet.</td></tr>`;
           return;
         }
 
@@ -132,14 +131,13 @@
           row.innerHTML = `
             <td class="searchable-name"><strong>${student.username}</strong></td>
             <td style="font-weight: 600; color: var(--stone);">${combinedOutput}</td>
-            <td><code>${student.roadmap_track || 'empty'}</code></td>
           `;
           tbody.appendChild(row);
         });
 
       } catch (err) {
         console.error("Database table mapping exception:", err);
-        tbody.innerHTML = `<tr><td colspan="3" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="2" class="loading-placeholder" style="color:red;">Error fetching data. Check server logs.</td></tr>`;
       }
     }
 
