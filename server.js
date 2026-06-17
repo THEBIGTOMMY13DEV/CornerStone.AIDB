@@ -3,12 +3,23 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg'); 
 const bcrypt = require('bcryptjs');
+const path = require('path'); // Added path utility for clean absolute folder mapping
 
 // 2. Initialize the app
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json()); // This allows Express to understand JSON data
 app.use(express.static('public')); // Tells Express to serve your HTML files
+
+// ==================== ROOT HOMEPAGE ROUTING OVERRIDE ====================
+// Forces the root URL ( / ) to serve your custom homepage file cleanly
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'HomePage', 'index.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Login', 'login.html'));
+});
+// =========================================================================
 
 // 3. Set up the Cloud Database connection pool (Neon.tech)
 const pool = new Pool({
@@ -130,6 +141,7 @@ app.get('/api/students', async (req, res) => {
     res.status(500).json({ error: "Server database extraction failure." });
   }
 });
+
 app.post('/api/update-stats', async (req, res) => {
   try {
     const { username, gpa, active_courses, pending_deadlines, sat_math, sat_reading, sat_science } = req.body;
@@ -148,6 +160,7 @@ app.post('/api/update-stats', async (req, res) => {
     res.status(500).json({ error: "Server error updating benchmark telemetry." });
   }
 });
+
 // SECURE ENDPOINT: REMOVE A USER FROM THE SYSTEM
 app.delete('/api/students/:username', async (req, res) => {
   try {
@@ -173,6 +186,7 @@ app.delete('/api/students/:username', async (req, res) => {
     res.status(500).json({ error: "Server database execution failure." });
   }
 });
+
 // FETCH COMPREHENSIVE SCHOOL ROSTER DATA
 app.get('/api/admin/roster', async (req, res) => {
   try {
@@ -202,6 +216,7 @@ app.post('/api/admin/behavior', async (req, res) => {
     res.status(500).json({ error: "Failed to update database behavior records." });
   }
 });
+
 // 5. Start the engine
 app.listen(port, () => {
   console.log(`🚀 Cornerstone AI server is alive in the cloud on port ${port}`);
