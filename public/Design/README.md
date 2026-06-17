@@ -1,0 +1,1 @@
+These are where the design, wireframes, and style guides for the website will be stored. 

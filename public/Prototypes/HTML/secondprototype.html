@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cornerstone | Personalized Roadmap</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --serif:'DM Serif Display',serif;
+      --sans:'DM Sans',sans-serif;
+      --stone:#2C2C2A;--stone-mid:#888780;--stone-light:#F1EFE8;--stone-border:#D3D1C7;
+      --teal-bg:#E1F5EE;--teal-mid:#1D9E75;--teal-dark:#085041;
+      --amber-bg:#FAEEDA;--amber-mid:#BA7517;--amber-dark:#633806;
+      --coral-bg:#FAECE7;--coral-mid:#D85A30;--coral-dark:#4A1B0C;
+      --purple-bg:#EEEDFE;--purple-mid:#534AB7;--purple-dark:#26215C;
+    }
+    body{font-family:var(--sans);background:var(--stone-light);color:var(--stone);padding:2rem 1rem}
+    #app{max-width:680px;margin:0 auto;background:#fff;padding:2.5rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.05)}
+    .screen{display:none}
+    .screen.active{display:block}
+    .wordmark{font-family:var(--serif);font-size:28px;letter-spacing:-.5px;margin-bottom:.25rem}
+    .tagline{font-size:14px;color:var(--stone-mid);margin-bottom:2.5rem}
+    .field-label{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--stone-mid);margin-bottom:.5rem}
+    .field{margin-bottom:1.5rem}
+    select,input[type=text]{
+      width:100%;height:44px;padding:0 12px;border:1px solid var(--stone-border);
+      border-radius:8px;font-family:var(--sans);font-size:14px;background:#fff;color:var(--stone);
+      appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;
+    }
+    select:disabled{background-color:#f9f9f9;cursor:not-allowed;opacity:0.6}
+    select{background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888780' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+    .progress-group{display:flex;flex-direction:column;gap:8px}
+    .prog-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--stone-border);border-radius:8px;cursor:pointer;transition:all .15s}
+    .prog-row:hover{background:var(--stone-light)}
+    .prog-row.selected{background:var(--teal-bg);border-color:var(--teal-mid)}
+    .prog-row input[type=radio]{accent-color:var(--teal-mid);width:18px;height:18px;flex-shrink:0}
+    .prog-label{font-size:14px;font-weight:600}
+    .prog-desc{font-size:12px;color:var(--stone-mid);margin-top:2px}
+    .cta{width:100%;height:48px;background:var(--stone);color:#fff;border:none;border-radius:8px;
+      font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer;margin-top:1rem;transition:opacity .2s}
+    .cta:hover{opacity:.9}
+    .cta:disabled{opacity:.3;cursor:not-allowed}
+    .back-btn{background:none;border:1px solid var(--stone-border);border-radius:6px;padding:6px 12px;
+      font-size:12px;color:var(--stone-mid);cursor:pointer;margin-bottom:1.5rem}
+    .student-banner{background:var(--stone-light);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;
+      display:flex;align-items:center;justify-content:space-between}
+    .student-name{font-family:var(--serif);font-size:22px}
+    .student-meta{font-size:14px;color:var(--stone-mid)}
+    .badge{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;text-transform:uppercase}
+    .badge-teal{background:var(--teal-bg);color:var(--teal-dark)}
+    .badge-amber{background:var(--amber-bg);color:var(--amber-dark)}
+    .badge-coral{background:var(--coral-bg);color:var(--coral-dark)}
+    .section-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+      color:var(--stone-mid);margin:1.5rem 0 1rem;display:flex;align-items:center;gap:10px}
+    .section-line{flex:1;height:1px;background:var(--stone-border)}
+    .milestone-list{display:flex;flex-direction:column;gap:8px}
+    .milestone{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--stone-border);
+      border-radius:10px;cursor:pointer;transition:background .2s}
+    .milestone.done{background:var(--teal-bg);border-color:var(--teal-mid)}
+    .check{width:22px;height:22px;border-radius:50%;border:1px solid var(--stone-border);
+      display:flex;align-items:center;justify-content:center;background:#fff}
+    .milestone.done .check{background:var(--teal-mid);border-color:var(--teal-mid)}
+    .checkmark{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;display:none}
+    .milestone.done .checkmark{display:block}
+    .m-content{flex:1}
+    .m-title{font-size:14px;font-weight:500}
+    .m-sub{font-size:12px;color:var(--stone-mid)}
+    .m-week{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px}
+    .week-now{background:var(--purple-bg);color:var(--purple-dark)}
+    .week-soon{background:var(--amber-bg);color:var(--amber-dark)}
+    .progress-bar-wrap{margin-bottom:2rem}
+    .pb-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+    .pb-track{height:8px;background:var(--stone-light);border-radius:10px;overflow:hidden}
+    .pb-fill{height:100%;background:var(--teal-mid);width:0%;transition:width 0.6s cubic-bezier(0.4, 0, 0.2, 1)}
+    .tip-box{background:var(--purple-bg);border-radius:10px;padding:1.25rem;margin-top:2rem;
+      font-size:14px;color:var(--purple-dark);line-height:1.6;border-left:4px solid var(--purple-mid)}
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="screen active" id="s-diag">
+    <div class="wordmark">Cornerstone</div>
+    <div class="tagline">Personalized academic recovery for every grade.</div>
+
+    <div class="field">
+      <div class="field-label">Your name</div>
+      <input type="text" id="inp-name" placeholder="Enter your name" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">Grade</div>
+      <select id="inp-grade" onchange="updateCourseOptions()">
+        <option value="">Select grade...</option>
+        <option value="9">9th grade</option>
+        <option value="10">10th grade</option>
+        <option value="11">11th grade</option>
+        <option value="12">12th grade</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Current course</div>
+      <select id="inp-course" disabled onchange="validateForm()">
+        <option value="">Select grade first...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Current Status</div>
+      <div class="progress-group" id="prog-group">
+        <label class="prog-row" onclick="selectProg(this)">
+          <input type="radio" name="prog" value="lost" onchange="validateForm()">
+          <div><div class="prog-label">Completely lost</div><div class="prog-desc">I need to rebuild the foundation</div></div>
+        </label>
+        <label class="prog-row" onclick="selectProg(this)">
+          <input type="radio" name="prog" value="gaps" onchange="validateForm()">
+          <div><div class="prog-label">Some big gaps</div><div class="prog-desc">Specific units are tripping me up</div></div>
+        </label>
+        <label class="prog-row" onclick="selectProg(this)">
+          <input type="radio" name="prog" value="shaky" onchange="validateForm()">
+          <div><div class="prog-label">Shaky on a few things</div><div class="prog-desc">Mostly following, just need a polish</div></div>
+        </label>
+      </div>
+    </div>
+
+    <button class="cta" id="gen-btn" onclick="generateRoadmap()" disabled>Generate my roadmap →</button>
+  </div>
+
+  <div class="screen" id="s-roadmap">
+    <button class="back-btn" onclick="goBack()">← Start over</button>
+    <div class="student-banner">
+      <div>
+        <div class="student-name" id="r-name"></div>
+        <div class="student-meta" id="r-meta"></div>
+      </div>
+      <span class="badge" id="r-badge"></span>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="pb-label"><span>Recovery Progress</span><strong id="pb-pct">0%</strong></div>
+      <div class="pb-track"><div class="pb-fill" id="pb-fill"></div></div>
+    </div>
+
+    <div class="section-header"><span>Priority Gaps</span><div class="section-line"></div></div>
+    <div class="milestone-list" id="gaps-list"></div>
+
+    <div class="section-header"><span>Upcoming Units</span><div class="section-line"></div></div>
+    <div class="milestone-list" id="next-list"></div>
+
+    <div class="tip-box" id="tip-box"></div>
+  </div>
+</div>
+
+<script>
+const GRADE_COURSES = {
+  "9": ["algebra1", "biology", "world_hist", "english9"],
+  "10": ["geometry", "chemistry", "us_hist", "english10"],
+  "11": ["algebra2", "physics", "usgov", "english11"],
+  "12": ["precalc", "ap_stats", "econ", "english12"]
+};
+
+const CURRICULUM = {
+  algebra1: {
+    label: "Algebra I",
+    lost: [
+      {title: "Integers & Absolute Value", sub: "Foundation", week: "Week 1", phase: "gap"},
+      {title: "The Distributive Property", sub: "Algebra Basics", week: "Week 1-2", phase: "gap"},
+      {title: "Solving One-Step Equations", sub: "Current Unit", week: "Week 3", phase: "next"}
+    ],
+    gaps: [
+      {title: "Multi-Step Equations", sub: "Algebra Basics", week: "Week 1", phase: "gap"},
+      {title: "Variables on Both Sides", sub: "Unit 2 Prep", week: "Week 2", phase: "next"}
+    ],
+    shaky: [
+      {title: "Literal Equations", sub: "Review", week: "Week 1", phase: "gap"},
+      {title: "Inequalities on a Number Line", sub: "Current Unit", week: "Week 2", phase: "next"}
+    ],
+    tip: { lost: "Focus on negative numbers first; they are the #1 cause of mistakes in Algebra I.", gaps: "Master the 'Golden Rule' of equations: what you do to one side, you must do to the other.", shaky: "Practice word problems; translating English to Math is your final hurdle." }
+  },
+  geometry: {
+    label: "Geometry",
+    lost: [
+      {title: "Segments & Midpoints", sub: "Unit 1", week: "Week 1", phase: "gap"},
+      {title: "Angle Addition Postulate", sub: "Foundation", week: "Week 2", phase: "gap"},
+      {title: "Parallel Line Theorems", sub: "Current Unit", week: "Week 3", phase: "next"}
+    ],
+    gaps: [
+      {title: "Transversals & Angles", sub: "Unit 2", week: "Week 1", phase: "gap"},
+      {title: "Intro to Triangle Proofs", sub: "Unit 3 Prep", week: "Week 2", phase: "next"}
+    ],
+    shaky: [
+      {title: "Conditional Statements", sub: "Logic Review", week: "Week 1", phase: "gap"},
+      {title: "SSS, SAS, ASA Postulates", sub: "Current Unit", week: "Week 2", phase: "next"}
+    ],
+    tip: { lost: "Geometry is visual. If there is no picture, draw one immediately.", gaps: "Don't memorize proofs; learn the 'reasons' like vertical angles or reflexive property first.", shaky: "Focus on CPCTC. It's the key to finishing almost every triangle proof." }
+  },
+  physics: {
+    label: "Physics",
+    lost: [
+      {title: "Scientific Notation & Units", sub: "Math Prep", week: "Week 1", phase: "gap"},
+      {title: "Vector Addition (Head-to-Tail)", sub: "Unit 1", week: "Week 2", phase: "gap"},
+      {title: "1D Kinematics Equations", sub: "Current Unit", week: "Week 3", phase: "next"}
+    ],
+    gaps: [
+      {title: "Velocity vs. Acceleration Graphs", sub: "Unit 1", week: "Week 1", phase: "gap"},
+      {title: "Free Fall & Gravity", sub: "Current Unit", week: "Week 2", phase: "next"}
+    ],
+    shaky: [
+      {title: "Calculating Net Force", sub: "Refresher", week: "Week 1", phase: "gap"},
+      {title: "Newton's Second Law (F=ma)", sub: "Current Unit", week: "Week 2", phase: "next"}
+    ],
+    tip: { lost: "Physics is Algebra with units. If your units don't cancel out, your answer is wrong.", gaps: "Master the 'Big 3' kinematics equations before moving to 2D motion.", shaky: "Vectors are just triangles. Brush up on SOH-CAH-TOA." }
+  },
+  ap_stats: {
+    label: "AP Statistics",
+    lost: [
+      {title: "Categorical vs Quantitative Data", sub: "Unit 1", week: "Week 1", phase: "gap"},
+      {title: "Standard Deviation Meaning", sub: "Foundation", week: "Week 2", phase: "gap"},
+      {title: "Normal Distributions (Z-Scores)", sub: "Current Unit", week: "Week 3", phase: "next"}
+    ],
+    gaps: [
+      {title: "The 68-95-99.7 Rule", sub: "Unit 2", week: "Week 1", phase: "gap"},
+      {title: "Residuals & Least Squares", sub: "Unit 3 Prep", week: "Week 2", phase: "next"}
+    ],
+    shaky: [
+      {title: "Correlation Coefficient (r)", sub: "Review", week: "Week 1", phase: "gap"},
+      {title: "Sampling Methods & Bias", sub: "Current Unit", week: "Week 2", phase: "next"}
+    ],
+    tip: { lost: "Context is king. Never just give a number; explain what it means for the data set.", gaps: "The Normal Curve is the foundation for the entire second semester. Master it now.", shaky: "Practice your calculator shortcuts for 1-Var Stats to save time on exams." }
+  },
+  // Placeholders for remaining expanded courses
+  world_hist: { label: "World History", lost: [{title:"Timeline Analysis", sub:"Skill", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "History is a story, not just dates." } },
+  biology: { label: "Biology", lost: [{title:"Cell Theory", sub:"Unit 1", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "Draw the organelles!" } },
+  chemistry: { label: "Chemistry", lost: [{title:"Valence Electrons", sub:"Unit 1", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "The Periodic Table is a cheat sheet." } },
+  usgov: { label: "U.S. Government", lost: [{title:"Checks & Balances", sub:"Unit 1", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "Focus on the 3 branches." } },
+  precalc: { label: "Pre-Calculus", lost: [{title:"Unit Circle", sub:"Trig", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "Radian measures are just fractions." } },
+  english10: { label: "English 10", lost: [{title:"PEEL Paragraphs", sub:"Writing", week:"W1", phase:"gap"}], gaps: [], shaky: [], tip: { lost: "Evidence first, then analysis." } }
+};
+
+function updateCourseOptions() {
+  const grade = document.getElementById('inp-grade').value;
+  const courseSelect = document.getElementById('inp-course');
+  courseSelect.innerHTML = '<option value="">Select course...</option>';
+  
+  if (grade && GRADE_COURSES[grade]) {
+    GRADE_COURSES[grade].forEach(key => {
+      if (CURRICULUM[key]) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = CURRICULUM[key].label;
+        courseSelect.appendChild(opt);
+      }
+    });
+    courseSelect.disabled = false;
+  } else {
+    courseSelect.disabled = true;
+  }
+  validateForm();
+}
+
+function selectProg(el) {
+  document.querySelectorAll('.prog-row').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+  validateForm();
+}
+
+function validateForm() {
+  const name = document.getElementById('inp-name').value.trim();
+  const grade = document.getElementById('inp-grade').value;
+  const course = document.getElementById('inp-course').value;
+  const prog = document.querySelector('input[name="prog"]:checked');
+  document.getElementById('gen-btn').disabled = !(name && grade && course && prog);
+}
+
+function generateRoadmap() {
+  const name = document.getElementById('inp-name').value.trim();
+  const grade = document.getElementById('inp-grade').value;
+  const courseKey = document.getElementById('inp-course').value;
+  const prog = document.querySelector('input[name="prog"]:checked').value;
+  const data = CURRICULUM[courseKey];
+
+  document.getElementById('r-name').textContent = name;
+  document.getElementById('r-meta').textContent = `${grade}th Grade · ${data.label}`;
+
+  const badgeEl = document.getElementById('r-badge');
+  const badges = {
+    lost: ['Needs Foundation','badge-coral'],
+    gaps: ['Bridging Gaps','badge-amber'],
+    shaky: ['Polishing','badge-teal']
+  };
+  badgeEl.textContent = badges[prog][0];
+  badgeEl.className = 'badge ' + badges[prog][1];
+
+  const milestones = data[prog];
+  const gaps = milestones.filter(m => m.phase === 'gap');
+  const nexts = milestones.filter(m => m.phase === 'next');
+
+  renderList(gaps, 'gaps-list');
+  renderList(nexts, 'next-list');
+  
+  document.getElementById('tip-box').innerHTML = `<strong>Study Strategy:</strong> ${data.tip[prog] || "Focus on consistent daily review."}`;
+  updateProgress(milestones.length);
+
+  document.getElementById('s-diag').classList.remove('active');
+  document.getElementById('s-roadmap').classList.add('active');
+}
+
+function renderList(items, containerId) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  items.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'milestone';
+    div.innerHTML = `
+      <div class="check"><svg class="checkmark" viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></div>
+      <div class="m-content">
+        <div class="m-title">${m.title}</div>
+        <div class="m-sub">${m.sub}</div>
+      </div>
+      <span class="m-week ${m.phase === 'gap' ? 'week-now' : 'week-soon'}">${m.week}</span>`;
+    div.onclick = () => {
+      div.classList.toggle('done');
+      updateProgress();
+    };
+    el.appendChild(div);
+  });
+}
+
+function updateProgress() {
+  const total = document.querySelectorAll('.milestone').length;
+  const done = document.querySelectorAll('.milestone.done').length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  document.getElementById('pb-pct').textContent = pct + '%';
+  document.getElementById('pb-fill').style.width = pct + '%';
+}
+
+function goBack() {
+  document.getElementById('s-roadmap').classList.remove('active');
+  document.getElementById('s-diag').classList.add('active');
+}
+
+document.getElementById('inp-name').oninput = validateForm;
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+{
+    "courses": [
+        {
+            "id": "alg-1",
+            "name": "Algebra I",
+            "topics": [
+                {
+                    "id": "linear-eq",
+                    "title": "Linear Equations and Inequalities",
+                    "prerequisites": [
+                        "basic-arithmetic"
+                    ],
+                    "description": "Solving single-variable equations and graphing linear functions."
+                },
+                {
+                    "id": "systems-linear",
+                    "title": "Systems of Equations",
+                    "prerequisites": [
+                        "linear-eq"
+                    ],
+                    "description": "Finding intersections of lines using substitution and elimination."
+                }
+            ]
+        },
+        {
+            "id": "geo",
+            "name": "Geometry",
+            "topics": [
+                {
+                    "id": "congruence-proofs",
+                    "title": "Congruence and Geometric Proofs",
+                    "prerequisites": [
+                        "linear-eq"
+                    ],
+                    "description": "Using logic and theorems to prove triangle congruence."
+                },
+                {
+                    "id": "trig-foundations",
+                    "title": "Right Triangle Trigonometry",
+                    "prerequisites": [
+                        "square-roots"
+                    ],
+                    "description": "Introduction to Sine, Cosine, and Tangent (SOH CAH TOA)."
+                }
+            ]
+        },
+        {
+            "id": "alg-2",
+            "name": "Algebra II",
+            "topics": [
+                {
+                    "id": "quadratics",
+                    "title": "Quadratic Equations",
+                    "prerequisites": [
+                        "factoring-basic",
+                        "square-roots"
+                    ],
+                    "description": "Solving equations of the second degree using the quadratic formula and completing the square."
+                },
+                {
+                    "id": "complex-numbers",
+                    "title": "Complex Number System",
+                    "prerequisites": [
+                        "square-roots"
+                    ],
+                    "description": "Working with imaginary units and complex arithmetic."
+                },
+                {
+                    "id": "poly-functions",
+                    "title": "Polynomial and Rational Functions",
+                    "prerequisites": [
+                        "quadratics",
+                        "factoring-basic"
+                    ],
+                    "description": "Analyzing higher-degree functions and their asymptotes."
+                },
+                {
+                    "id": "exp-log",
+                    "title": "Exponential and Logarithmic Functions",
+                    "prerequisites": [
+                        "linear-eq"
+                    ],
+                    "description": "Solving for variables in exponents and understanding logarithmic scales."
+                }
+            ]
+        },
+        {
+            "id": "pre-calc",
+            "name": "Pre-Calculus",
+            "topics": [
+                {
+                    "id": "unit-circle",
+                    "title": "Trigonometric Functions and the Unit Circle",
+                    "prerequisites": [
+                        "trig-foundations",
+                        "poly-functions"
+                    ],
+                    "description": "Extending trig to all real numbers and graphing periodic functions."
+                },
+                {
+                    "id": "vectors-matrices",
+                    "title": "Vectors and Matrix Algebra",
+                    "prerequisites": [
+                        "systems-linear"
+                    ],
+                    "description": "Using matrices to solve systems and representing magnitude and direction."
+                },
+                {
+                    "id": "conic-sections",
+                    "title": "Conic Sections",
+                    "prerequisites": [
+                        "quadratics"
+                    ],
+                    "description": "The algebra of circles, ellipses, parabolas, and hyperbolas."
+                },
+                {
+                    "id": "limits-intro",
+                    "title": "Introduction to Limits and Continuity",
+                    "prerequisites": [
+                        "poly-functions"
+                    ],
+                    "description": "Conceptual bridge to Calculus: observing function behavior as inputs approach infinity."
+                }
+            ]
+        }
+    ],
+    "foundations": [
+        {
+            "id": "basic-arithmetic",
+            "title": "Arithmetic Operations",
+            "source": "Middle School Math",
+            "importance": "Critical"
+        },
+        {
+            "id": "factoring-basic",
+            "title": "Basic Factoring",
+            "source": "Algebra I",
+            "importance": "Critical"
+        },
+        {
+            "id": "square-roots",
+            "title": "Simplifying Radicals",
+            "source": "Pre-Algebra",
+            "importance": "High"
+        }
+    ]
+}
