@@ -62,9 +62,9 @@ loginForm.addEventListener('submit', async (e) => {
       // THE REDIRECT LOGIC
       setTimeout(() => {
         if (data.role === "Student") {
-          window.location.href = "student.html";
+          window.location.href = "/LandingPage/Dashboard/Staff/dashboard.html";
         } else {
-          window.location.href = "staff.html";
+          window.location.href = "/LandingPage/Dashboard/Student/dashboard.html";
         }
       }, 1000); // Wait 1 second so they see the success message
 
