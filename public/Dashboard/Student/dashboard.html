@@ -324,54 +324,88 @@
     }
 
     async function processQuizAnswer() {
-      const selectedInput = document.querySelector('input[name="quiz-input-node"]:checked');
-      if (!selectedInput) { alert("Please select an option to proceed."); return; }
-      
-      const isCorrect = parseInt(selectedInput.value);
-      const currentSubject = DIAG_QUIZ[quizIndex].subject;
+  const selectedInput = document.querySelector('input[name="quiz-input-node"]:checked');
+  if (!selectedInput) { alert("Please select an option to proceed."); return; }
+  
+  const isCorrect = parseInt(selectedInput.value);
+  const currentSubject = DIAG_QUIZ[quizIndex].subject;
 
-      if (isCorrect === 1) {
-        rawScores[currentSubject]++;
-      }
+  if (isCorrect === 1) {
+    rawScores[currentSubject]++;
+  }
 
-      quizIndex++;
-      if (quizIndex < DIAG_QUIZ.length) {
-        renderQuizQuestion();
-      } else {
-        // SAT Scaling Calculation Logic: Base scaled score (200) + (Correct / Max Questions) * 600
-        const finalMath = 200 + Math.round((rawScores.math / 2) * 600);
-        const finalReading = 200 + Math.round((rawScores.reading / 2) * 600);
-        const finalScience = 200 + Math.round((rawScores.science / 1) * 600);
+  quizIndex++;
+  if (quizIndex < DIAG_QUIZ.length) {
+    renderQuizQuestion();
+  } else {
+    // 1. Calculate Standardized SAT Scaled Scores
+    const finalMath = 200 + Math.round((rawScores.math / 2) * 600);
+    const finalReading = 200 + Math.round((rawScores.reading / 2) * 600);
+    const finalScience = 200 + Math.round((rawScores.science / 1) * 600);
 
-        // Composite Score Mapping to generate realistic local High School GPA equivalents
-        const totalComposite = finalMath + finalReading;
-        const computedGpa = ((totalComposite / 1600) * 4.0).toFixed(2);
+    const totalComposite = finalMath + finalReading;
+    const computedGpa = ((totalComposite / 1600) * 4.0).toFixed(2);
 
-        // Post data to our database schema layout
-        try {
-          const response = await fetch('/api/update-stats', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              username: sessionUser,
-              gpa: computedGpa,
-              active_courses: 4,
-              pending_deadlines: 2,
-              sat_math: finalMath,
-              sat_reading: finalReading,
-              sat_science: finalScience
-            })
-          });
+    // 2. Commit the Exam Data to your Neon Cloud Registry
+    try {
+      const response = await fetch('/api/update-stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: sessionUser,
+          gpa: computedGpa,
+          active_courses: 4,
+          pending_deadlines: 2,
+          sat_math: finalMath,
+          sat_reading: finalReading,
+          sat_science: finalScience
+        })
+      });
 
-          if (response.ok) {
-            document.getElementById('quiz-view').classList.add('hidden');
-            hydrateDashboardLayout(computedGpa, 4, 2);
-          }
-        } catch (err) {
-          console.error(err);
+      if (response.ok) {
+        // Hide the quiz sheet wrapper
+        document.getElementById('quiz-view').classList.add('hidden');
+        
+        // Populate the data widgets on the main LMS screen 
+        hydrateDashboardLayout(computedGpa, 4, 2);
+        
+        // 3. LINK QUIZ SCORES DIRECTLY TO ROADMAP GENERATION
+        // We find their lowest scoring area to target for academic recovery
+        let targetedCourseKey = "algebra1"; // High School Default fallback
+        let confidenceStatus = "gaps";      // Mid tier default placeholder
+        
+        if (finalMath <= finalReading && finalMath <= finalScience) {
+          targetedCourseKey = "algebra1"; // Math focus needed
+          confidenceStatus = finalMath < 500 ? "lost" : "gaps";
+        } else if (finalReading <= finalMath && finalReading <= finalScience) {
+          targetedCourseKey = "english11"; // Reading focus needed
+          confidenceStatus = finalReading < 500 ? "lost" : "gaps";
+        } else {
+          targetedCourseKey = "biology"; // Science focus needed
+          confidenceStatus = finalScience < 500 ? "lost" : "gaps";
         }
+
+        // 4. Bypass the manual input form fields programmatically
+        document.getElementById('inp-grade').value = "11"; // Default to 11th grade baseline map
+        updateCourseOptions(); // Wake up the selections engine inside roadmap script
+        
+        document.getElementById('inp-course').value = targetedCourseKey;
+        
+        // Check the calculated radio button parameter value
+        const targetRadio = document.querySelector(`input[name="prog"][value="${confidenceStatus}"]`);
+        if (targetRadio) targetRadio.checked = true;
+
+        // 5. Trigger your engine's roadmap builder and switch tabs automatically!
+        generateRoadmap(); 
+        switchTab('roadmap');
+        
+        alert("Diagnostic exam completed! Your personalized learning recovery roadmap has been generated based on your test results.");
       }
+    } catch (err) {
+      console.error("Failed to link exam metrics to roadmap generator:", err);
     }
+  }
+}
 
     function hydrateDashboardLayout(gpa, courses, tasks) {
       document.getElementById('stat-gpa').textContent = parseFloat(gpa).toFixed(2);
