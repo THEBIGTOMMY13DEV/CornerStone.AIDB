@@ -14,7 +14,7 @@ app.use(express.static('public')); // Tells Express to serve your HTML files
 // ==================== ROOT HOMEPAGE ROUTING OVERRIDE ====================
 // Forces the root URL ( / ) to serve your custom homepage file cleanly
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'homepage', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'LandingPage', 'index.html'));
 });
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'Login', 'login.html'));
