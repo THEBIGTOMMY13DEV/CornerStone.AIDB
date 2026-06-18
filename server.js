@@ -19,6 +19,12 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'Login', 'login.html'));
 });
+app.get('/staffdashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Dashboard', 'Staff', 'dashboard.html'));
+});
+app.get('/studentdashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Dashboard', 'Student', 'dashboard.html'));
+});
 // =========================================================================
 
 // 3. Set up the Cloud Database connection pool (Neon.tech)
